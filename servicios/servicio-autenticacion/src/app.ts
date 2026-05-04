@@ -9,7 +9,7 @@ interface ErrorNegocio extends Error {
   status?: number;
 }
 
-const app: Express = express();
+const app = express() as Express;
 
 // Middleware básico
 app.use(express.json());
