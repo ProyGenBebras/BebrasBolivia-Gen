@@ -4,7 +4,7 @@ Aplicación frontend construida con Next.js, Tailwind y TypeScript.
 
 ## Requisitos
 
-- Node.js >= 18
+- Node.js 22.22.2
 - npm >= 9
 
 ## Instalación

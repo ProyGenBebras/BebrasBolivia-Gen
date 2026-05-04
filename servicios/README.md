@@ -80,6 +80,8 @@ Actualmente el compose incluye PostgreSQL y `auth-service`.
 
 ## Convenciones de colaboración
 
+- Node.js 22.22.2 es la version objetivo del monorepo.
+
 - Mantener contratos de negocio en `domain`.
 - Orquestar casos de uso en `application`.
 - Implementaciones concretas en `infrastructure`.

@@ -64,7 +64,7 @@ El monorepo usa npm workspaces en la raiz:
 
 ## Requisitos
 
-- Node.js >= 18
+- Node.js 22.22.2
 - npm >= 9
 - Git
 - Docker (opcional, para BD/compose)

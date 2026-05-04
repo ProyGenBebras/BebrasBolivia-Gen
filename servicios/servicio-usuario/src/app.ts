@@ -3,22 +3,33 @@
  * Inicialización minimalista de middleware y rutas
  */
 
-import express, { type Application, type NextFunction, type Request, type Response } from 'express';
+import express, {
+  type Application,
+  type ErrorRequestHandler,
+  type RequestHandler,
+} from 'express';
+
+type ExpressFactory = {
+  (): Application;
+  json: () => RequestHandler;
+  urlencoded: (options?: { extended?: boolean }) => RequestHandler;
+};
 
 interface ErrorNegocio extends Error {
   status?: number;
 }
 
-const app: Application = express();
+const expressFactory = express as unknown as ExpressFactory;
+const app: Application = expressFactory();
 
-const notFoundHandler = (_req: Request, res: Response): void => {
+const notFoundHandler: RequestHandler = (_req, res): void => {
   res.status(404).json({
     error: 'Ruta no encontrada',
     status: 404,
   });
 };
 
-const errorHandler = (err: ErrorNegocio, _req: Request, res: Response, _next: NextFunction): void => {
+const errorHandler: ErrorRequestHandler = (err: ErrorNegocio, _req, res, _next): void => {
   console.error('Error:', err);
   const status = err.status ?? 500;
   const message = err.message ?? 'Error interno del servidor';
@@ -30,11 +41,11 @@ const errorHandler = (err: ErrorNegocio, _req: Request, res: Response, _next: Ne
 };
 
 // Middleware básico
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(expressFactory.json());
+app.use(expressFactory.urlencoded({ extended: true }));
 
 // Rutas básicas (placeholder)
-app.get('/health', (_req: Request, res: Response) => {
+app.get('/health', (_req, res) => {
   res.status(200).json({ status: 'ok', service: 'servicio-usuario' });
 });
 
