@@ -3,12 +3,7 @@
  * Inicialización minimalista de middleware y rutas
  */
 
-import { createRequire } from 'module';
-
-import type { Application, ErrorRequestHandler, RequestHandler } from 'express';
-
-const require = createRequire(import.meta.url);
-const express = require('express') as typeof import('express');
+import express, { type Application, type ErrorRequestHandler, type RequestHandler } from 'express';
 
 interface ErrorNegocio extends Error {
   status?: number;
