@@ -3,24 +3,18 @@
  * Inicialización minimalista de middleware y rutas
  */
 
-import express, {
-  type Application,
-  type ErrorRequestHandler,
-  type RequestHandler,
-} from 'express';
+import { createRequire } from 'module';
 
-type ExpressFactory = {
-  (): Application;
-  json: () => RequestHandler;
-  urlencoded: (options?: { extended?: boolean }) => RequestHandler;
-};
+import type { Application, ErrorRequestHandler, RequestHandler } from 'express';
+
+const require = createRequire(import.meta.url);
+const express = require('express') as typeof import('express');
 
 interface ErrorNegocio extends Error {
   status?: number;
 }
 
-const expressFactory = express as unknown as ExpressFactory;
-const app: Application = expressFactory();
+const app: Application = express();
 
 const notFoundHandler: RequestHandler = (_req, res): void => {
   res.status(404).json({
@@ -41,8 +35,8 @@ const errorHandler: ErrorRequestHandler = (err: ErrorNegocio, _req, res, _next):
 };
 
 // Middleware básico
-app.use(expressFactory.json());
-app.use(expressFactory.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Rutas básicas (placeholder)
 app.get('/health', (_req, res) => {
