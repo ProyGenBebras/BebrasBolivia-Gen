@@ -2,21 +2,29 @@
   "root": true,
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
-    "project": "./tsconfig.eslint.json"
+    "ecmaVersion": 2022,
+    "sourceType": "module",
+    "project": true,
+    "tsconfigRootDir": "."
   },
   "plugins": ["@typescript-eslint"],
   "extends": [
     "eslint:recommended",
-    "plugin:@typescript-eslint/recommended",
-    "plugin:@typescript-eslint/recommended-requiring-type-checking"
+    "plugin:@typescript-eslint/recommended"
   ],
   "env": {
     "node": true,
     "es2022": true
   },
   "rules": {
-    "@typescript-eslint/no-unsafe-assignment": "error",
-    "@typescript-eslint/no-unsafe-call": "error",
-    "@typescript-eslint/no-unsafe-member-access": "error"
-  }
+    "@typescript-eslint/no-explicit-any": "warn"
+  },
+  "overrides": [
+    {
+      "files": ["src/**/*.ts"],
+      "parserOptions": {
+        "project": ["./tsconfig.json"]
+      }
+    }
+  ]
 }

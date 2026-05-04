@@ -3,7 +3,6 @@
  * Inicialización minimalista de middleware y rutas
  */
 
-
 import express, { Express, Request, Response, NextFunction } from 'express';
 
 interface ErrorNegocio extends Error {
