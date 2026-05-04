@@ -15,7 +15,6 @@ module.exports = [
       parserOptions: {
         ecmaVersion: 'latest',
         sourceType: 'module',
-        project: ['./tsconfig.json', './server/tsconfig.json', './client/tsconfig.json'],
         tsconfigRootDir: __dirname,
       },
     },
@@ -43,6 +42,42 @@ module.exports = [
           alphabetize: { order: 'asc', caseInsensitive: true },
         },
       ],
+    },
+  },
+  {
+    files: ['servicios/servicio-autenticacion/**/*.ts'],
+    languageOptions: {
+      parser: tsparser,
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+        project: ['./servicios/servicio-autenticacion/tsconfig.json'],
+        tsconfigRootDir: __dirname,
+      },
+    },
+  },
+  {
+    files: ['servicios/servicio-usuario/**/*.ts'],
+    languageOptions: {
+      parser: tsparser,
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+        project: ['./servicios/servicio-usuario/tsconfig.json'],
+        tsconfigRootDir: __dirname,
+      },
+    },
+  },
+  {
+    files: ['cliente/**/*.ts', 'cliente/**/*.tsx'],
+    languageOptions: {
+      parser: tsparser,
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+        project: ['./cliente/tsconfig.json'],
+        tsconfigRootDir: __dirname,
+      },
     },
   },
 ];
