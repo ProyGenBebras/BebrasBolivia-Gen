@@ -1,226 +1,79 @@
 # BebrasBolivia-Gen
 
-Monorepo para la plataforma colaborativa BebrasBolivia.
-
-Arquitectura actual:
-- Frontend: Next.js (`cliente`)
-- Backend: microservicios Node.js/Express (`servicios`)
-- Testing: Jest
-- Calidad: ESLint + Prettier + Husky
-
-## Estructura actual
-
-```text
-BebrasBolivia-Gen/
-|-- cliente/                           # Frontend Next.js
-|   |-- src/
-|   |   |-- app/
-|   |   |-- modulos/
-|   |   |   `-- user/
-|   |   `-- compartido/
-|   `-- pruebas/
-|       |-- unitarias/
-|       |-- integracion/
-|       `-- extremo-a-extremo/
-|-- servicios/                         # Backend microservicios
-|   |-- servicio-autenticacion/
-|   |   |-- src/
-|   |   |   |-- config/
-|   |   |   |-- controladores/
-|   |   |   |-- dtos/
-|   |   |   |-- middlewares/
-|   |   |   |-- modelos/
-|   |   |   |-- repositorios/
-|   |   |   |-- rutas/
-|   |   |   `-- servicios/
-|   |   `-- pruebas/
-|   |       |-- unitarias/
-|   |       `-- integracion/
-|   `-- servicio-usuario/
-|       |-- src/
-|       |   |-- config/
-|       |   |-- controladores/
-|       |   |-- dtos/
-|       |   |-- middlewares/
-|       |   |-- modelos/
-|       |   |-- repositorios/
-|       |   |-- rutas/
-|       |   `-- servicios/
-|       `-- pruebas/
-|           |-- unitarias/
-|           `-- integracion/
-|-- .github/workflows/ci.yml          # CI (lint, test, build)
-|-- .husky/                           # Git hooks
-|-- docker-compose.yml
-|-- package.json                      # Scripts raiz + workspaces
-`-- README.MD
-```
-
-## Workspaces
-
-El monorepo usa npm workspaces en la raiz:
-- `servicios`
-- `cliente`
+Monorepo: Frontend Next.js + Backend Express + Testing Jest
 
 ## Requisitos
 
 - Node.js 22.22.2
-- npm >= 9
+- npm 10.9.7
 - Git
-- Docker (opcional, para BD/compose)
+- nvm (para gestionar versiones de Node)
 
-## Instalacion
-
-Desde la raiz:
+## Inicio Rápido
 
 ```bash
+# 1. Activar versión de Node
+nvm use
+
+# 2. Instalar dependencias exactas (IMPORTANTE: usa npm ci, NO npm install)
 npm ci
-npm run install:all
-```
 
-## Desarrollo local
-
-### Levantar todo desde raiz
-
-```bash
-npm run dev
-```
-
-Esto ejecuta:
-- `servicios`: `servicio-autenticacion`, `servicio-usuario` en paralelo
-- `cliente`: Next.js
-
-### Levantar solo backend microservicios
-
-```bash
-npm run dev --workspace=servicios
-```
-
-### Levantar solo frontend
-
-```bash
+# 3. Ejecutar frontend (Next.js) - http://localhost:3000
 npm run dev --workspace=cliente
+
+# 4. Ejecutar backend (Express) - http://localhost:4102/health
+npm --prefix servicios/servicio-usuario run dev
+
+# 5. Ejecutar tests
+npm run validate
 ```
 
-## Puertos por defecto
+**¿Por qué `npm ci` y no `npm install`?**
 
-Microservicios:
-- servicio-autenticacion: `4101`
-- servicio-usuario: `4102`
+- `npm ci` (Clean Install): Instala **versiones exactas** del `package-lock.json`. Garantiza que todos en el equipo tengan exactamente las mismas versiones. **ESTO ES LO QUE DEBES USAR.**
+- `npm install`: Puede actualizar versiones según los rangos (`^`, `~`). Puede causar diferencias entre máquinas del equipo.
 
-Frontend:
-- cliente (Next.js): `3000` (por defecto)
+**Resumen**: Siempre usa `npm ci` en el setup inicial. Solo usa `npm install` si necesitas agregar una dependencia nueva.
 
-## Scripts principales
-
-Desde la raiz:
+## Comandos Principales
 
 ```bash
-npm run dev
-npm run build
-npm test
-npm run lint
-npm run format
-npm run format && npm run lint && npm test
-```
+# Tests y validación completa (ejecutar antes de push)
+npm run validate
 
-Scripts utiles por workspace:
-
-```bash
-npm run dev --workspace=servicios
-npm run build --workspace=servicios
+# Tests por workspace
+npm run test --workspace=cliente
 npm run test --workspace=servicios
 
-npm run dev --workspace=cliente
-npm run build --workspace=cliente
-npm run test --workspace=cliente
-```
-
-## Scripts por microservicio
-
-Ejemplos:
-
-```bash
-npm --prefix servicios/servicio-autenticacion run dev
-npm --prefix servicios/servicio-usuario run dev
-npm --prefix servicios/servicio-autenticacion run test:unit
-npm --prefix servicios/servicio-autenticacion run test:integration
-```
-
-## Docker Compose
-
-Archivo: `docker-compose.yml`
-
-Actualmente incluye:
-- `postgres_db` (PostgreSQL)
-- `auth-service` (build local)
-
-Levantar compose:
-
-```bash
-docker compose up
-```
-
-## Calidad y validaciones
-
-### Antes de commit
-
-```bash
-npm test
+# Build
 npm run build
+
+# Lint
+npm run lint
+
+# Format
+npm run format
 ```
 
-### Hooks
+## Git Workflow
 
-- `pre-commit`: ejecuta `lint-staged`
-- `pre-push`: ejecuta tests
+- `main`: rama estable
+- `develop`: rama de integración
+- Crear PR con formato: `feat/nombre-feature` o `fix/nombre-bug`
+- Usar Conventional Commits: `feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`
+- Todo commit ejecuta hooks automáticos (lint, format, tests)
 
-## CI
+## Estructura
 
-Workflow: `.github/workflows/ci.yml`
-
-En push a `feat/*`, `develop` y `main`, y en PR hacia `main` o `develop`, ejecuta:
-1. Instalacion limpia
-2. Format check
-3. Lint
-4. Type-check (cliente)
-5. Tests
-6. Build
-
-## Estrategia de ramas
-
-- `develop`: rama de integracion. Aqui se suben y validan cambios del equipo.
-- `main`: rama principal estable. Solo recibe cambios ya validados desde `develop`.
-
-Flujo recomendado:
-1. Crear rama `feat/*` desde `develop`.
-2. Abrir PR de `feat/*` hacia `develop`.
-3. Cuando `develop` este estable, abrir PR de `develop` hacia `main`.
-
-Checks obligatorios:
-- El workflow ya ejecuta checks para PR a `develop` y `main`.
-
-## Troubleshooting rapido
-
-### La extension Jest en VS Code no detecta comando
-
-Si ves "multiple candidates found", es porque es monorepo con varios paquetes.
-
-Solucion rapida:
-- Usar Quick Fix: "Jest: Setup monorepo"
-
-### El frontend no conecta a servicios
-
-Verifica en `cliente/.env`:
-- `NEXT_PUBLIC_AUTH_SERVICE_URL`
-- `NEXT_PUBLIC_USER_SERVICE_URL`
-- `NEXT_PUBLIC_TEAM_SERVICE_URL`
-
-Y confirma que los microservicios estan levantados.
-
-## Convencion de trabajo para equipos
-
-- Cada equipo trabaja por modulo/servicio en su rama.
+```
+BebrasBolivia-Gen/
+├── cliente/              # Frontend Next.js + React
+├── servicios/
+│   └── servicio-usuario/ # Backend Express (puerto 4102)
+├── .husky/               # Git hooks
+├── .github/workflows/    # CI/CD
+└── package.json          # Monorepo root
+```
 - Evitar cambios innecesarios en archivos raiz compartidos.
 - Correr `npm test` y `npm run build` antes de abrir PR.
 - Mantener dominio/aplicacion desacoplados de infraestructura en cada servicio.
