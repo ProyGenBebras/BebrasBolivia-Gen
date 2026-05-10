@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, type FormEvent } from 'react';
+
 import { ROLES_USUARIO, type CrearUsuarioPayload, type RolUsuario } from '../dominio/usuario';
 import { crearUsuarioApi } from '../infraestructura/usuario-api';
 
@@ -91,7 +92,13 @@ export function CrearUsuarioForm(): JSX.Element {
   }
 
   return (
-    <form onSubmit={manejarEnvio} noValidate style={estilos.form}>
+    <form
+      onSubmit={(evento) => {
+        void manejarEnvio(evento);
+      }}
+      noValidate
+      style={estilos.form}
+    >
       <h2>Crear usuario manualmente</h2>
 
       <Campo
