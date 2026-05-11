@@ -13,7 +13,11 @@ type Propiedades = {
   children: React.ReactNode;
 };
 
-export function ProtegerRuta({ rolUsuario, permisoRequerido, children }: Propiedades) {
+export function ProtegerRuta({
+  rolUsuario,
+  permisoRequerido,
+  children,
+}: Propiedades): React.ReactElement | null {
   const router = useRouter();
 
   useEffect(() => {
