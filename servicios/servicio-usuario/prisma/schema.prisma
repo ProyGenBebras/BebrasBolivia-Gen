@@ -1,0 +1,76 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum RolUsuario {
+  administrador
+  coordinador
+  profesor
+  estudiante
+}
+
+model Institucion {
+  id           String       @id @default(uuid())
+  nombre       String       @db.VarChar(255)
+  direccion    String?      @db.Text
+  ciudad       String?      @db.VarChar(100)
+  creadoEn     DateTime     @default(now()) @map("creado_en") @db.Timestamptz
+  actualizadoEn DateTime     @default(now()) @map("actualizado_en") @db.Timestamptz
+
+  estudiantes  Estudiante[]
+  profesores   Profesor[]
+
+  @@map("instituciones")
+}
+
+model Usuario {
+  id               String       @id @default(uuid())
+  rol              RolUsuario
+  nombre           String       @db.VarChar(100)
+  apellidos        String       @db.VarChar(100)
+  email            String       @unique @db.VarChar(255)
+  password         String       @db.VarChar(255)
+  telefono         String?      @db.VarChar(20)
+  googleId         String?      @unique @map("google_id") @db.VarChar(255)
+  activo           Boolean?     @default(true)
+  emailVerificado  Boolean?     @default(false) @map("email_verificado")
+  intentosFallidos Int?         @default(0) @map("intentos_fallidos")
+  bloqueadoHasta   DateTime?    @map("bloqueado_hasta") @db.Timestamptz
+  ultimoLogin      DateTime?    @map("ultimo_login") @db.Timestamptz
+  ipUltimoLogin    String?      @map("ip_ultimo_login")
+  creadoEn         DateTime?    @default(now()) @map("creado_en") @db.Timestamptz
+  actualizadoEn    DateTime?    @default(now()) @map("actualizado_en") @db.Timestamptz
+
+  estudiante       Estudiante?
+  profesor         Profesor?
+
+  @@index([email])
+  @@index([rol])
+  @@map("usuarios")
+}
+
+model Estudiante {
+  usuarioId     String      @id @map("usuario_id") @db.Uuid
+  usuario       Usuario     @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  grado         Int
+  seccion       String      @db.VarChar(10)
+  institucionId String?     @map("institucion_id") @db.Uuid
+  institucion   Institucion? @relation(fields: [institucionId], references: [id])
+
+  @@map("estudiantes")
+}
+
+model Profesor {
+  usuarioId     String      @id @map("usuario_id") @db.Uuid
+  usuario       Usuario     @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  especialidad  String?     @db.VarChar(100)
+  institucionId String?     @map("institucion_id") @db.Uuid
+  institucion   Institucion? @relation(fields: [institucionId], references: [id])
+
+  @@map("profesores")
+}

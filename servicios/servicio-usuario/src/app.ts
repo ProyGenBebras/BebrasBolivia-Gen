@@ -33,10 +33,15 @@ const errorHandler: ErrorRequestHandler = (err: ErrorNegocio, _req, res, _next):
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+import usuarioRoutes from './rutas/usuario.routes';
+
 // Rutas básicas (placeholder)
 app.get('/health', (_req, res) => {
   res.status(200).json({ status: 'ok', service: 'servicio-usuario' });
 });
+
+app.use('/api/usuarios', usuarioRoutes);
+
 
 // Manejo de rutas no encontradas (404)
 app.use(notFoundHandler);
