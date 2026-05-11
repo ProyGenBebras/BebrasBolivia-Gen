@@ -8,6 +8,7 @@
                     "dev":  "tsx src/server.ts",
                     "build":  "tsc",
                     "start":  "node dist/server.js",
+                    "pretest":  "npm run prisma:generate",
                     "test":  "jest --config jest.config.cjs --runInBand --passWithNoTests",
                     "test:unit":  "jest --config jest.config.cjs --runInBand pruebas/unitarias",
                     "test:integration":  "dotenv -e .env.test -- jest --config jest.config.cjs --runInBand pruebas/integracion",
