@@ -33,20 +33,20 @@ describe('RolServicio (Pruebas Unitarias)', () => {
             };
             rolRepositorioMock.obtenerPorId.mockResolvedValue(rolSimulado);
 
-            // Actuar (Act): Ejecutamos el método
+            // Ejecutamos el método
             const resultado = await rolServicio.obtenerPorId(1);
 
-            // Afirmar (Assert): Verificamos el resultado
+            // Verificamos el resultado
             expect(resultado).toEqual(rolSimulado);
             expect(rolRepositorioMock.obtenerPorId).toHaveBeenCalledWith(1);
             expect(rolRepositorioMock.obtenerPorId).toHaveBeenCalledTimes(1);
         });
 
         it('debería lanzar un ErrorNegocio (404) si el rol no existe', async () => {
-            // Preparar: El mock devuelve null (no encontrado)
+            // El mock devuelve null (no encontrado)
             rolRepositorioMock.obtenerPorId.mockResolvedValue(null);
 
-            // Actuar & Afirmar: Verificamos que lance la excepción esperada
+            //Verificamos que lance la excepción esperada
             await expect(rolServicio.obtenerPorId(999)).rejects.toThrow(ErrorNegocio);
             await expect(rolServicio.obtenerPorId(999)).rejects.toMatchObject({
                 status: 404,
