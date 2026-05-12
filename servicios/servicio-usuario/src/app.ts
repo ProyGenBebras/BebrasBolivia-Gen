@@ -20,6 +20,7 @@ app.get('/health', (_req, res) => {
 
 app.use('/api/v1/roles', rolRutas);
 
+
 const notFoundHandler: RequestHandler = (_req, res): void => {
   res.status(404).json({ error: 'Ruta no encontrada', status: 404 });
 };
