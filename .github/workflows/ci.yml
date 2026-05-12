@@ -12,9 +12,9 @@ jobs:
   calidad:
     runs-on: ubuntu-latest
     steps:
-      - name: Code Checkout
+      - name: Obtener codigo
         uses: actions/checkout@v4
-      - name: Node.js setup
+      - name: Configurar Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22.22.2'
@@ -26,8 +26,8 @@ jobs:
       - name: Analisis estatico
         run: npm run lint
       - name: Auditoria de seguridad
-        run: npm audit --audit-level=high || true
+        run: npm audit --audit-level=high
       - name: Pruebas con cobertura
-        run: npm test
+        run: npm run test:coverage
       - name: Build
         run: npm run build

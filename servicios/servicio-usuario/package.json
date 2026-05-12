@@ -11,7 +11,10 @@
     "test": "jest --config jest.config.cjs --runInBand --passWithNoTests",
     "test:unit": "jest --config jest.config.cjs --runInBand pruebas/unitarias",
     "test:integration": "jest --config jest.config.cjs --runInBand pruebas/integracion",
+    "test:coverage": "jest --config jest.config.cjs --runInBand --coverage --passWithNoTests",
     "lint": "eslint src/**/*.ts",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "format:check": "prettier --check \"src/**/*.ts\"",
     "db:generate": "prisma generate --schema=schema.prisma",
     "db:push": "prisma db push --schema=schema.prisma",
     "seed": "tsx base-de-datos/semillas/roles.seed.ts"

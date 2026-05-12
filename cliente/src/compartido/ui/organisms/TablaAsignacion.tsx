@@ -12,7 +12,7 @@ interface TablaAsignacionProps {
     roles: RolVista[];
     rolActualId: number;
     onAsignar: (usuarioId: number, rolId: number) => Promise<void>;
-    cargando: boolean;
+    estaCargando: boolean;
 }
 
 export function TablaAsignacion({
@@ -20,7 +20,7 @@ export function TablaAsignacion({
     roles,
     rolActualId,
     onAsignar,
-    cargando,
+    estaCargando,
 }: TablaAsignacionProps): JSX.Element {
     const [asignando, setAsignando] = useState<number | null>(null);
     const [busqueda, setBusqueda] = useState('');
@@ -43,7 +43,7 @@ export function TablaAsignacion({
         }
     };
 
-    if (cargando) {
+    if (estaCargando) {
         return (
             <div className="flex h-48 items-center justify-center">
                 <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-300 border-t-slate-700" />

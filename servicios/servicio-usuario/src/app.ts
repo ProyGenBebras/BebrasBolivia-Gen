@@ -1,12 +1,10 @@
+import { randomUUID } from 'crypto';
+
 import cors from 'cors';
 import express, { type Application, type ErrorRequestHandler, type RequestHandler } from 'express';
 
+import { ErrorNegocio } from './utilidades/errores.js';
 import rolRutas from './rutas/rol.rutas.js';
-
-
-interface ErrorNegocio extends Error {
-  status?: number;
-}
 
 const app: Application = express();
 
@@ -24,11 +22,22 @@ const notFoundHandler: RequestHandler = (_req, res): void => {
   res.status(404).json({ error: 'Ruta no encontrada', status: 404 });
 };
 
-const errorHandler: ErrorRequestHandler = (err: ErrorNegocio, _req, res, _next): void => {
-  console.error('Error:', err);
-  const status = err.status ?? 500;
-  const message = err.message ?? 'Error interno del servidor';
-  res.status(status).json({ error: message, status });
+/**
+ * Middleware centralizado de manejo de errores.
+ * Los errores de negocio devuelven su código y mensaje.
+ * Los errores internos generan una referencia única para trazabilidad.
+ */
+const errorHandler: ErrorRequestHandler = (err: unknown, _req, res, _next): void => {
+  if (err instanceof ErrorNegocio) {
+    res.status(err.status).json({ error: err.message });
+    return;
+  }
+  const referencia = randomUUID();
+  console.error('Error interno no controlado:', referencia, err);
+  res.status(500).json({
+    error: 'Error interno del servidor',
+    referencia,
+  });
 };
 
 app.use(notFoundHandler);

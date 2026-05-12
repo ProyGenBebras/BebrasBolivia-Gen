@@ -11,30 +11,30 @@ import type { CrearRolPayload, UsuarioResumen } from '../../dominio/rol';
 import { rolApi } from '../../infraestructura/api/rol.api';
 
 interface EstadoFormulario {
-    abierto: boolean;
-    nombre: string;
-    descripcion: string;
-    enviando: boolean;
-    error: string | null;
+  abierto: boolean;
+  nombre: string;
+  descripcion: string;
+  estaEnviando: boolean;
+  error: string | null;
 }
 
 export function GestionRoles(): JSX.Element {
     const [roles, setRoles] = useState<RolVista[]>([]);
     const [rolSeleccionadoId, setRolSeleccionadoId] = useState<number | null>(null);
     const [usuarios, setUsuarios] = useState<UsuarioResumen[]>([]);
-    const [cargandoRoles, setCargandoRoles] = useState(true);
-    const [cargandoUsuarios, setCargandoUsuarios] = useState(false);
+    const [estaCargandoRoles, setEstaCargandoRoles] = useState(true);
+    const [estaCargandoUsuarios, setEstaCargandoUsuarios] = useState(false);
     const [errorGlobal, setErrorGlobal] = useState<string | null>(null);
     const [formulario, setFormulario] = useState<EstadoFormulario>({
         abierto: false,
         nombre: '',
         descripcion: '',
-        enviando: false,
+        estaEnviando: false,
         error: null,
     });
 
     const cargarRoles = useCallback(async (): Promise<void> => {
-        setCargandoRoles(true);
+        setEstaCargandoRoles(true);
         setErrorGlobal(null);
         try {
             const data = await rolApi.listar();
@@ -42,19 +42,19 @@ export function GestionRoles(): JSX.Element {
         } catch {
             setErrorGlobal('No se pudieron cargar los roles. Verifica la conexión con el servidor.');
         } finally {
-            setCargandoRoles(false);
+            setEstaCargandoRoles(false);
         }
     }, []);
 
     const cargarUsuariosDeRol = useCallback(async (rolId: number): Promise<void> => {
-        setCargandoUsuarios(true);
+        setEstaCargandoUsuarios(true);
         try {
             const data = await rolApi.obtenerUsuarios(rolId);
             setUsuarios(data);
         } catch {
             setUsuarios([]);
         } finally {
-            setCargandoUsuarios(false);
+            setEstaCargandoUsuarios(false);
         }
     }, []);
 
@@ -89,7 +89,7 @@ export function GestionRoles(): JSX.Element {
             setFormulario((prev) => ({ ...prev, error: 'El nombre del rol es obligatorio' }));
             return;
         }
-        setFormulario((prev) => ({ ...prev, enviando: true, error: null }));
+        setFormulario((prev) => ({ ...prev, estaEnviando: true, error: null }));
         try {
             const payload: CrearRolPayload = {
                 nombre: formulario.nombre.trim(),
@@ -97,10 +97,10 @@ export function GestionRoles(): JSX.Element {
             };
             await rolApi.crear(payload);
             await cargarRoles();
-            setFormulario({ abierto: false, nombre: '', descripcion: '', enviando: false, error: null });
+            setFormulario({ abierto: false, nombre: '', descripcion: '', estaEnviando: false, error: null });
         } catch (err) {
             const mensaje = err instanceof Error ? err.message : 'Error al crear el rol';
-            setFormulario((prev) => ({ ...prev, enviando: false, error: mensaje }));
+            setFormulario((prev) => ({ ...prev, estaEnviando: false, error: mensaje }));
         }
     };
 
@@ -149,7 +149,7 @@ export function GestionRoles(): JSX.Element {
                             <Badge texto={`${roles.length} total`} variante="neutro" />
                         </div>
 
-                        {cargandoRoles ? (
+                        {estaCargandoRoles ? (
                             <div className="space-y-3">
                                 {[1, 2, 3].map((i) => (
                                     <div key={i} className="h-28 animate-pulse rounded-2xl bg-slate-200" />
@@ -193,7 +193,7 @@ export function GestionRoles(): JSX.Element {
                                     roles={roles}
                                     rolActualId={rolSeleccionado.id}
                                     onAsignar={asignarRol}
-                                    cargando={cargandoUsuarios}
+                                    estaCargando={estaCargandoUsuarios}
                                 />
                             </div>
                         ) : (
@@ -273,10 +273,10 @@ export function GestionRoles(): JSX.Element {
                             </button>
                             <button
                                 onClick={() => void crearRol()}
-                                disabled={formulario.enviando}
+                                disabled={formulario.estaEnviando}
                                 className="flex-1 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:opacity-50"
                             >
-                                {formulario.enviando ? 'Creando...' : 'Crear rol'}
+                                {formulario.estaEnviando ? 'Creando...' : 'Crear rol'}
                             </button>
                         </div>
                     </div>
