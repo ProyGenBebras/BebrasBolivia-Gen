@@ -12,3 +12,12 @@ export interface RolConUsuarios extends Rol {
         usuarios: number;
     };
 }
+
+export interface UsuarioEnRol {
+    id: number;
+    nombre: string;
+    apellidos: string;
+    email: string;
+    activo: boolean;
+    createdAt: Date;
+}

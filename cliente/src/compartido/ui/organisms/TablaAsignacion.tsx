@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 
-import type { UsuarioResumen } from '../../../modulos/user/dominio/rol';
 import type { RolVista } from '../../../modulos/user/aplicacion/mappers/rol.mapper';
+import type { UsuarioResumen } from '../../../modulos/user/dominio/rol';
+
 import { Badge } from '../atoms/Badge';
 
 interface TablaAsignacionProps {
@@ -20,7 +21,7 @@ export function TablaAsignacion({
     rolActualId,
     onAsignar,
     cargando,
-}: TablaAsignacionProps) {
+}: TablaAsignacionProps): JSX.Element {
     const [asignando, setAsignando] = useState<number | null>(null);
     const [busqueda, setBusqueda] = useState('');
 
@@ -33,7 +34,7 @@ export function TablaAsignacion({
         );
     });
 
-    const manejarAsignacion = async (usuarioId: number, rolId: number) => {
+    const manejarAsignacion = async (usuarioId: number, rolId: number): Promise<void> => {
         setAsignando(usuarioId);
         try {
             await onAsignar(usuarioId, rolId);

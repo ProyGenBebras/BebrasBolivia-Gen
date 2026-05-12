@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 
 import type { ActualizarRolDto, AsignarRolDto, CrearRolDto } from '../dtos/rol.dto.js';
-import type { Rol, RolConUsuarios } from '../modelos/rol.modelo.js';
+import type { Rol, RolConUsuarios, UsuarioEnRol } from '../modelos/rol.modelo.js';
 
 export class RolRepositorio {
     constructor(private readonly prisma: PrismaClient) { }
@@ -47,7 +47,7 @@ export class RolRepositorio {
         });
     }
 
-    async obtenerUsuariosPorRol(rolId: number) {
+    async obtenerUsuariosPorRol(rolId: number): Promise<UsuarioEnRol[]> {
         return this.prisma.user.findMany({
             where: { rolId },
             select: {

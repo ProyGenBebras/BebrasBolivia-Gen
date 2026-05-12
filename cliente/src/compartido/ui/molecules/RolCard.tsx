@@ -1,5 +1,6 @@
-import { Badge } from '../atoms/Badge';
 import type { RolVista } from '../../../modulos/user/aplicacion/mappers/rol.mapper';
+
+import { Badge } from '../atoms/Badge';
 
 interface RolCardProps {
     rol: RolVista;
@@ -14,7 +15,7 @@ const iconoPorNombre: Record<string, string> = {
     participante: '◉',
 };
 
-export function RolCard({ rol, seleccionado, onSeleccionar, onToggleActivo }: RolCardProps) {
+export function RolCard({ rol, seleccionado, onSeleccionar, onToggleActivo }: RolCardProps): JSX.Element {
     const icono = iconoPorNombre[rol.nombre] ?? '◆';
     const variante = rol.nombre as 'adm' | 'examinador' | 'participante';
 

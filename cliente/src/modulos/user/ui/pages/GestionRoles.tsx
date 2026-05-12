@@ -2,12 +2,13 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
-import { mapearRolesAVista, type RolVista } from '../../aplicacion/mappers/rol.mapper';
-import type { CrearRolPayload, UsuarioResumen } from '../../dominio/rol';
-import { rolApi } from '../../infraestructura/api/rol.api';
 import { Badge } from '../../../../compartido/ui/atoms/Badge';
 import { RolCard } from '../../../../compartido/ui/molecules/RolCard';
 import { TablaAsignacion } from '../../../../compartido/ui/organisms/TablaAsignacion';
+
+import { mapearRolesAVista, type RolVista } from '../../aplicacion/mappers/rol.mapper';
+import type { CrearRolPayload, UsuarioResumen } from '../../dominio/rol';
+import { rolApi } from '../../infraestructura/api/rol.api';
 
 interface EstadoFormulario {
     abierto: boolean;
@@ -17,7 +18,7 @@ interface EstadoFormulario {
     error: string | null;
 }
 
-export function GestionRoles() {
+export function GestionRoles(): JSX.Element {
     const [roles, setRoles] = useState<RolVista[]>([]);
     const [rolSeleccionadoId, setRolSeleccionadoId] = useState<number | null>(null);
     const [usuarios, setUsuarios] = useState<UsuarioResumen[]>([]);
@@ -32,7 +33,7 @@ export function GestionRoles() {
         error: null,
     });
 
-    const cargarRoles = useCallback(async () => {
+    const cargarRoles = useCallback(async (): Promise<void> => {
         setCargandoRoles(true);
         setErrorGlobal(null);
         try {
@@ -45,7 +46,7 @@ export function GestionRoles() {
         }
     }, []);
 
-    const cargarUsuariosDeRol = useCallback(async (rolId: number) => {
+    const cargarUsuariosDeRol = useCallback(async (rolId: number): Promise<void> => {
         setCargandoUsuarios(true);
         try {
             const data = await rolApi.obtenerUsuarios(rolId);
@@ -61,12 +62,12 @@ export function GestionRoles() {
         void cargarRoles();
     }, [cargarRoles]);
 
-    const seleccionarRol = (id: number) => {
+    const seleccionarRol = (id: number): void => {
         setRolSeleccionadoId(id);
         void cargarUsuariosDeRol(id);
     };
 
-    const toggleActivo = async (id: number, activo: boolean) => {
+    const toggleActivo = async (id: number, activo: boolean): Promise<void> => {
         try {
             await rolApi.actualizar(id, { activo });
             await cargarRoles();
@@ -75,7 +76,7 @@ export function GestionRoles() {
         }
     };
 
-    const asignarRol = async (usuarioId: number, rolId: number) => {
+    const asignarRol = async (usuarioId: number, rolId: number): Promise<void> => {
         await rolApi.asignar({ usuarioId, rolId });
         if (rolSeleccionadoId !== null) {
             await cargarUsuariosDeRol(rolSeleccionadoId);
@@ -83,7 +84,7 @@ export function GestionRoles() {
         await cargarRoles();
     };
 
-    const crearRol = async () => {
+    const crearRol = async (): Promise<void> => {
         if (!formulario.nombre.trim()) {
             setFormulario((prev) => ({ ...prev, error: 'El nombre del rol es obligatorio' }));
             return;
@@ -162,7 +163,9 @@ export function GestionRoles() {
                                         rol={rol}
                                         seleccionado={rolSeleccionadoId === rol.id}
                                         onSeleccionar={seleccionarRol}
-                                        onToggleActivo={(id, activo) => void toggleActivo(id, activo)}
+                                        onToggleActivo={(id: number, activo: boolean): void => {
+                                            void toggleActivo(id, activo);
+                                        }}
                                     />
                                 ))}
                                 {roles.length === 0 && (

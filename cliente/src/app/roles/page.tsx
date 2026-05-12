@@ -7,6 +7,6 @@ export const metadata: Metadata = {
     description: 'Administra los roles y permisos de los usuarios del sistema',
 };
 
-export default function RolesPage() {
+export default function RolesPage(): JSX.Element {
     return <GestionRoles />;
-}
+}
