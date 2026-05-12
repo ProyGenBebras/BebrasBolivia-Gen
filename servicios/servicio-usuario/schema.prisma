@@ -7,6 +7,18 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Rol {
+  id          Int      @id @default(autoincrement())
+  nombre      String   @unique
+  descripcion String?
+  activo      Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  usuarios    User[]
+
+  @@map("roles")
+}
+
 model User {
   id                Int       @id @default(autoincrement())
   rolId             Int       @map("rol_id")
@@ -24,6 +36,7 @@ model User {
   ipUltimoLogin     String?   @map("ip_ultimo_login")
   createdAt         DateTime  @default(now()) @map("created_at")
   updatedAt         DateTime  @updatedAt @map("updated_at")
+  rol               Rol       @relation(fields: [rolId], references: [id])
 
   @@index([email])
   @@index([rolId])
