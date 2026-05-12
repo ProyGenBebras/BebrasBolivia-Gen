@@ -3,6 +3,8 @@ import express, { type Application, type ErrorRequestHandler, type RequestHandle
 
 import rolRutas from './rutas/rol.rutas.js';
 
+import usuarioRutas from './rutas/usuario.rutas.js';
+
 
 interface ErrorNegocio extends Error {
   status?: number;
@@ -19,6 +21,8 @@ app.get('/health', (_req, res) => {
 });
 
 app.use('/api/v1/roles', rolRutas);
+
+app.use('/api/v1/usuarios', usuarioRutas);
 
 const notFoundHandler: RequestHandler = (_req, res): void => {
   res.status(404).json({ error: 'Ruta no encontrada', status: 404 });
