@@ -3,16 +3,12 @@
 import { useState, type FormEvent } from 'react';
 
 import type { EditarPerfilPayload, DatosPerfilUsuario } from '../dominio/usuario';
+import { validarPerfil, type ErroresPerfil } from '../dominio/validar-perfil';
 import { editarPerfilApi } from '../infraestructura/usuario-api';
 
 type EstadoEnvio = 'inicial' | 'enviando' | 'exito' | 'error';
 
-interface ErroresFormulario {
-  nombres?: string;
-  apellidos?: string;
-  correo?: string;
-  telefono?: string;
-}
+type ErroresFormulario = ErroresPerfil;
 
 interface EditProfileFormProps {
   datosIniciales?: DatosPerfilUsuario;
@@ -21,8 +17,6 @@ interface EditProfileFormProps {
   onCancelar?: () => void;
 }
 
-const REGEX_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const REGEX_TELEFONO = /^\d{7,15}$/;
 
 export function EditProfileForm({
   datosIniciales,
@@ -40,33 +34,7 @@ export function EditProfileForm({
   const [mensaje, setMensaje] = useState('');
 
   function validar(): ErroresFormulario {
-    const nuevosErrores: ErroresFormulario = {};
-
-    if (!nombres.trim()) {
-      nuevosErrores.nombres = 'El nombre es obligatorio';
-    } else if (nombres.trim().length < 2) {
-      nuevosErrores.nombres = 'El nombre debe tener al menos 2 caracteres';
-    }
-
-    if (!apellidos.trim()) {
-      nuevosErrores.apellidos = 'Los apellidos son obligatorios';
-    } else if (apellidos.trim().length < 2) {
-      nuevosErrores.apellidos = 'Los apellidos deben tener al menos 2 caracteres';
-    }
-
-    if (!correo.trim()) {
-      nuevosErrores.correo = 'El correo es obligatorio';
-    } else if (!REGEX_EMAIL.test(correo.trim())) {
-      nuevosErrores.correo = 'El correo no tiene un formato válido';
-    }
-
-    if (!telefono.trim()) {
-      nuevosErrores.telefono = 'El teléfono es obligatorio';
-    } else if (!REGEX_TELEFONO.test(telefono.trim())) {
-      nuevosErrores.telefono = 'Ingrese un teléfono válido (7-15 dígitos)';
-    }
-
-    return nuevosErrores;
+    return validarPerfil({ nombres, apellidos, correo, telefono });
   }
 
   async function manejarEnvio(evento: FormEvent<HTMLFormElement>): Promise<void> {
