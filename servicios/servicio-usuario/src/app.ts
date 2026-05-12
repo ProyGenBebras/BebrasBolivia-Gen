@@ -5,6 +5,8 @@
 
 import express, { type Application, type ErrorRequestHandler, type RequestHandler } from 'express';
 
+import usuarioRutas from './rutas/usuario.rutas';
+
 interface ErrorNegocio extends Error {
   status?: number;
 }
@@ -37,6 +39,8 @@ app.use(express.urlencoded({ extended: true }));
 app.get('/health', (_req, res) => {
   res.status(200).json({ status: 'ok', service: 'servicio-usuario' });
 });
+
+app.use('/usuarios', usuarioRutas);
 
 // Manejo de rutas no encontradas (404)
 app.use(notFoundHandler);
