@@ -7,24 +7,24 @@ async function main(): Promise<void> {
         {
             nombre: 'adm',
             descripcion: 'Administrador del sistema con acceso total a la plataforma',
-            activo: true,
+            estaActivo: true,
         },
         {
             nombre: 'examinador',
             descripcion: 'Examina y evalua los portafolios de los participantes',
-            activo: true,
+            estaActivo: true,
         },
         {
             nombre: 'participante',
             descripcion: 'Usuario registrado que participa en las competencias',
-            activo: true,
+            estaActivo: true,
         },
     ];
 
     for (const rol of roles) {
         await prisma.rol.upsert({
             where: { nombre: rol.nombre },
-            update: { descripcion: rol.descripcion, activo: rol.activo },
+            update: { descripcion: rol.descripcion, estaActivo: rol.estaActivo },
             create: rol,
         });
     }

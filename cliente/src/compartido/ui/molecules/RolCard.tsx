@@ -1,4 +1,4 @@
-import type { RolVista } from '../../../modulos/user/aplicacion/mappers/rol.mapper';
+import type { RolVista } from '../../../modulos/usuario/aplicacion/mappers/rol.mapper';
 import { Badge } from '../atoms/Badge';
 
 interface RolCardProps {

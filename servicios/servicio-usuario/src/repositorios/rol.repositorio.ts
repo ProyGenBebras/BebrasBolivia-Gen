@@ -41,22 +41,22 @@ export class RolRepositorio {
   }
 
   async asignarAUsuario(datos: AsignarRolDto): Promise<void> {
-    await this.prisma.user.update({
+    await this.prisma.usuario.update({
       where: { id: datos.usuarioId },
       data: { rolId: datos.rolId },
     });
   }
 
   async obtenerUsuariosPorRol(rolId: number): Promise<UsuarioEnRol[]> {
-    return this.prisma.user.findMany({
+    return this.prisma.usuario.findMany({
       where: { rolId },
       select: {
         id: true,
         nombre: true,
         apellidos: true,
         email: true,
-        activo: true,
-        createdAt: true,
+        estaActivo: true,
+        creadoEn: true,
       },
       orderBy: { nombre: 'asc' },
     });

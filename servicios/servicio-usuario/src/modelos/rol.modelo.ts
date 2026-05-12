@@ -3,9 +3,9 @@ export interface Rol {
   id: number;
   nombre: string;
   descripcion: string | null;
-  activo: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  estaActivo: boolean;
+  creadoEn: Date;
+  actualizadoEn: Date;
 }
 
 export interface RolConUsuarios extends Rol {
@@ -19,6 +19,6 @@ export interface UsuarioEnRol {
   nombre: string;
   apellidos: string;
   email: string;
-  activo: boolean;
-  createdAt: Date;
+  estaActivo: boolean;
+  creadoEn: Date;
 }

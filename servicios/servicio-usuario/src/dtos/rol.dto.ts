@@ -6,7 +6,7 @@ export interface CrearRolDto {
 export interface ActualizarRolDto {
   nombre?: string;
   descripcion?: string;
-  activo?: boolean;
+  estaActivo?: boolean;
 }
 
 export interface AsignarRolDto {

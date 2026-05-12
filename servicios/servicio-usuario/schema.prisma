@@ -9,18 +9,18 @@ datasource db {
 }
 
 model Rol {
-  id          Int      @id @default(autoincrement())
-  nombre      String   @unique
+  id          Int       @id @default(autoincrement())
+  nombre      String    @unique
   descripcion String?
-  activo      Boolean  @default(true)
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
-  usuarios    User[]
+  estaActivo  Boolean   @default(true) @map("esta_activo")
+  creadoEn    DateTime  @default(now()) @map("creado_en")
+  actualizadoEn DateTime @updatedAt @map("actualizado_en")
+  usuarios    Usuario[]
 
   @@map("roles")
 }
 
-model User {
+model Usuario {
   id                Int       @id @default(autoincrement())
   rolId             Int       @map("rol_id")
   nombre            String
@@ -29,17 +29,17 @@ model User {
   password          String
   telefono          String?
   googleId          String?   @unique @map("google_id")
-  activo            Boolean   @default(true)
+  estaActivo        Boolean   @default(true) @map("esta_activo")
   emailVerificado   Boolean   @default(false) @map("email_verificado")
   intentosFallidos  Int       @default(0) @map("intentos_fallidos")
   bloqueadoHasta    DateTime? @map("bloqueado_hasta")
   ultimoLogin       DateTime? @map("ultimo_login")
   ipUltimoLogin     String?   @map("ip_ultimo_login")
-  createdAt         DateTime  @default(now()) @map("created_at")
-  updatedAt         DateTime  @updatedAt @map("updated_at")
+  creadoEn          DateTime  @default(now()) @map("creado_en")
+  actualizadoEn     DateTime  @updatedAt @map("actualizado_en")
   rol               Rol       @relation(fields: [rolId], references: [id])
 
   @@index([email])
   @@index([rolId])
-  @@map("users")
+  @@map("usuarios")
 }

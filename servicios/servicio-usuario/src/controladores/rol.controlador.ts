@@ -58,7 +58,7 @@ export class RolControlador {
       const datos: ActualizarRolDto = {};
       if (body.nombre !== undefined) datos.nombre = body.nombre.trim().toLowerCase();
       if (body.descripcion !== undefined) datos.descripcion = body.descripcion;
-      if (body.activo !== undefined) datos.activo = body.activo;
+      if (body.estaActivo !== undefined) datos.estaActivo = body.estaActivo;
 
       const rol = await this.rolServicio.actualizar(id, datos);
       res.status(200).json({ data: rol });

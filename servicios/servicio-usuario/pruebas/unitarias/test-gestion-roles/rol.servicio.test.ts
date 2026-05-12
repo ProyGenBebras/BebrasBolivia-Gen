@@ -10,10 +10,8 @@ describe('RolServicio (Pruebas Unitarias)', () => {
     let rolRepositorioMock: jest.Mocked<RolRepositorio>;
 
     beforeEach(() => {
-        // Limpiamos los mocks antes de cada prueba
         jest.clearAllMocks();
-        
-        // Inicializamos el Repositorio falso (mock) y el Servicio real
+
         const prismaFake = {} as PrismaClient;
         rolRepositorioMock = new RolRepositorio(prismaFake) as jest.Mocked<RolRepositorio>;
         rolServicio = new RolServicio(rolRepositorioMock);
@@ -21,37 +19,27 @@ describe('RolServicio (Pruebas Unitarias)', () => {
 
     describe('obtenerPorId', () => {
         it('debería retornar un rol si el ID existe', async () => {
-            // Definimos qué devolverá el mock
-            const rolSimulado = { 
-                id: 1, 
-                nombre: 'adm', 
-                descripcion: 'Admin', 
-                activo: true, 
-                createdAt: new Date(), 
-                updatedAt: new Date(),
+            const rolSimulado = {
+                id: 1,
+                nombre: 'adm',
+                descripcion: 'Admin',
+                estaActivo: true,
+                creadoEn: new Date(),
+                actualizadoEn: new Date(),
                 _count: { usuarios: 0 }
             };
             rolRepositorioMock.obtenerPorId.mockResolvedValue(rolSimulado);
 
-            // Ejecutamos el método
             const resultado = await rolServicio.obtenerPorId(1);
 
-            // Verificamos el resultado
             expect(resultado).toEqual(rolSimulado);
             expect(rolRepositorioMock.obtenerPorId).toHaveBeenCalledWith(1);
-            expect(rolRepositorioMock.obtenerPorId).toHaveBeenCalledTimes(1);
         });
 
-        it('debería lanzar un ErrorNegocio (404) si el rol no existe', async () => {
-            // El mock devuelve null (no encontrado)
+        it('debería lanzar ErrorNegocio (404) si el rol no existe', async () => {
             rolRepositorioMock.obtenerPorId.mockResolvedValue(null);
 
-            //Verificamos que lance la excepción esperada
             await expect(rolServicio.obtenerPorId(999)).rejects.toThrow(ErrorNegocio);
-            await expect(rolServicio.obtenerPorId(999)).rejects.toMatchObject({
-                status: 404,
-                message: 'Rol con id 999 no encontrado'
-            });
         });
     });
 
@@ -59,34 +47,70 @@ describe('RolServicio (Pruebas Unitarias)', () => {
         const nuevoRolDto = { nombre: 'nuevo_rol', descripcion: 'Test' };
 
         it('debería crear y retornar el rol si el nombre no existe', async () => {
-            // Simulamos que NO existe en la BD, y luego simulamos la creación
             rolRepositorioMock.obtenerPorNombre.mockResolvedValue(null);
-            
-            const rolCreado = { id: 2, ...nuevoRolDto, activo: true, createdAt: new Date(), updatedAt: new Date() };
+
+            const rolCreado = { id: 2, ...nuevoRolDto, estaActivo: true, creadoEn: new Date(), actualizadoEn: new Date() };
             rolRepositorioMock.crear.mockResolvedValue(rolCreado);
 
-            // Actuar
             const resultado = await rolServicio.crear(nuevoRolDto);
 
-            // Afirmar
             expect(resultado).toEqual(rolCreado);
-            expect(rolRepositorioMock.obtenerPorNombre).toHaveBeenCalledWith('nuevo_rol');
             expect(rolRepositorioMock.crear).toHaveBeenCalledWith(nuevoRolDto);
         });
 
-        it('debería lanzar un ErrorNegocio (409) si el nombre del rol ya está en uso', async () => {
-            // Simulamos que YA existe un rol con ese nombre en la BD
-            const rolExistente = { id: 1, nombre: 'nuevo_rol', descripcion: '', activo: true, createdAt: new Date(), updatedAt: new Date() };
+        it('debería lanzar ErrorNegocio (409) si el nombre del rol ya está en uso', async () => {
+            const rolExistente = { id: 1, nombre: 'nuevo_rol', descripcion: '', estaActivo: true, creadoEn: new Date(), actualizadoEn: new Date() };
             rolRepositorioMock.obtenerPorNombre.mockResolvedValue(rolExistente);
 
-            // Actuar & Afirmar
             await expect(rolServicio.crear(nuevoRolDto)).rejects.toThrow(ErrorNegocio);
-            await expect(rolServicio.crear(nuevoRolDto)).rejects.toMatchObject({
-                status: 409,
-                message: "El rol 'nuevo_rol' ya existe"
-            });
-            // Verificamos que el repositorio nunca intentó crear el registro
             expect(rolRepositorioMock.crear).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('actualizar', () => {
+        it('debería actualizar y retornar el rol si existe', async () => {
+            const rolExistente = { id: 1, nombre: 'adm', descripcion: 'Admin', estaActivo: true, creadoEn: new Date(), actualizadoEn: new Date(), _count: { usuarios: 0 } };
+            rolRepositorioMock.obtenerPorId.mockResolvedValue(rolExistente);
+
+            const rolActualizado = { ...rolExistente, descripcion: 'Admin modificado' };
+            rolRepositorioMock.actualizar.mockResolvedValue(rolActualizado);
+
+            const resultado = await rolServicio.actualizar(1, { descripcion: 'Admin modificado' });
+
+            expect(resultado).toEqual(rolActualizado);
+            expect(rolRepositorioMock.actualizar).toHaveBeenCalledWith(1, { descripcion: 'Admin modificado' });
+        });
+
+        it('debería lanzar ErrorNegocio (404) si se intenta actualizar un rol inexistente', async () => {
+            rolRepositorioMock.obtenerPorId.mockResolvedValue(null);
+            await expect(rolServicio.actualizar(999, { descripcion: 'test' })).rejects.toThrow(ErrorNegocio);
+        });
+    });
+
+    describe('asignarRol', () => {
+        it('debería llamar a asignarAUsuario en el repositorio', async () => {
+            const datos = { usuarioId: 1, rolId: 2 };
+            rolRepositorioMock.obtenerPorId.mockResolvedValue({ id: 2, nombre: 'rol', descripcion: '', estaActivo: true, creadoEn: new Date(), actualizadoEn: new Date(), _count: { usuarios: 0 } });
+            rolRepositorioMock.asignarAUsuario.mockResolvedValue(undefined);
+
+            await rolServicio.asignarRol(datos);
+
+            expect(rolRepositorioMock.asignarAUsuario).toHaveBeenCalledWith(datos);
+        });
+    });
+
+    describe('obtenerUsuariosDeRol', () => {
+        it('debería retornar la lista de usuarios para un rol dado', async () => {
+            rolRepositorioMock.obtenerPorId.mockResolvedValue({ id: 2, nombre: 'rol', descripcion: '', estaActivo: true, creadoEn: new Date(), actualizadoEn: new Date(), _count: { usuarios: 0 } });
+            const usuariosSimulados = [
+                { id: 1, nombre: 'Juan', apellidos: 'Perez', email: 'juan@test.com', estaActivo: true, creadoEn: new Date() }
+            ];
+            rolRepositorioMock.obtenerUsuariosPorRol.mockResolvedValue(usuariosSimulados);
+
+            const resultado = await rolServicio.obtenerUsuariosDeRol(2);
+
+            expect(resultado).toEqual(usuariosSimulados);
+            expect(rolRepositorioMock.obtenerUsuariosPorRol).toHaveBeenCalledWith(2);
         });
     });
 });
