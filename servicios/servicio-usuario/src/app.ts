@@ -4,6 +4,7 @@
  */
 
 import express, { type Application, type ErrorRequestHandler, type RequestHandler } from 'express';
+import usuarioRutas from './rutas/usuario.rutas';
 
 interface ErrorNegocio extends Error {
   status?: number;
@@ -32,6 +33,9 @@ const errorHandler: ErrorRequestHandler = (err: ErrorNegocio, _req, res, _next):
 // Middleware básico
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Rutas
+app.use('/usuarios', usuarioRutas);
 
 // Rutas básicas (placeholder)
 app.get('/health', (_req, res) => {
