@@ -27,6 +27,15 @@ export class UsuarioService {
     if (usuario.email === process.env.ROOT_ADMIN_EMAIL) {
       throw new Error('No se puede modificar el rol del administrador principal');
     }
+    // Regla: no dejar el sistema sin administradores
+    if (usuario.rol === RolUsuario.administrador && nuevoRol !== RolUsuario.administrador) {
+      const totalAdmins = await prisma.usuario.count({
+        where: { rol: RolUsuario.administrador }
+      });
+      if (totalAdmins <= 1) {
+        throw new Error('No se puede quitar el rol al último administrador del sistema');
+      }
+    }
 
     if (usuario.rol === nuevoRol) {
       return usuario;
@@ -45,9 +54,9 @@ export class UsuarioService {
     await prisma.$transaction(async (tx) => {
       // 1. Limpiar extensiones viejas si es necesario
       if (usuario.rol === RolUsuario.estudiante) {
-        await tx.estudiante.delete({ where: { usuarioId: id } }).catch(() => {});
+        await tx.estudiante.delete({ where: { usuarioId: id } }).catch(() => { });
       } else if (usuario.rol === RolUsuario.profesor) {
-        await tx.profesor.delete({ where: { usuarioId: id } }).catch(() => {});
+        await tx.profesor.delete({ where: { usuarioId: id } }).catch(() => { });
       }
 
       // 2. Crear/Actualizar nueva extensión

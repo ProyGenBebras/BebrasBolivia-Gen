@@ -21,7 +21,11 @@ export class UsuarioController {
     try {
       const { id } = req.params;
       const { rol, datos_adicionales } = req.body;
-
+      const solicitanteId = (req as any).usuarioAutenticado?.id;
+      if (solicitanteId && solicitanteId === id) {
+        res.status(403).json({ error: 'No puedes modificar tu propio rol' });
+        return;
+      }
       if (!rol) {
         res.status(400).json({ error: 'El campo "rol" es requerido' });
         return;
