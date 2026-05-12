@@ -1,7 +1,6 @@
 import type { ActualizarRolDto, AsignarRolDto, CrearRolDto } from '../dtos/rol.dto.js';
 import type { Rol, RolConUsuarios, UsuarioEnRol } from '../modelos/rol.modelo.js';
 import type { RolRepositorio } from '../repositorios/rol.repositorio.js';
-
 import { ErrorNegocio } from '../utilidades/errores.js';
 
 export { ErrorNegocio };

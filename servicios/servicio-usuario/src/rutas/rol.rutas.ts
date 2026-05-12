@@ -1,21 +1,13 @@
 import { PrismaClient } from '@prisma/client';
-import {
-  Router,
-  type NextFunction,
-  type Request,
-  type RequestHandler,
-  type Response,
-} from 'express';
+import { Router, type NextFunction, type Request, type Response } from 'express';
 
 import { manejarErrorNegocio, RolControlador } from '../controladores/rol.controlador.js';
 import { RolRepositorio } from '../repositorios/rol.repositorio.js';
 import { RolServicio } from '../servicios/rol.servicio.js';
 
-/**
- * Envuelve un handler async para que Express no se queje del Promise<void>.
- * Resuelve @typescript-eslint/no-misused-promises en Router.get/post/put.
- */
-function asyncHandler(fn: RequestHandler): RequestHandler {
+type AsyncHandler = (req: Request, res: Response, next: NextFunction) => Promise<void>;
+
+function asyncHandler(fn: AsyncHandler): (req: Request, res: Response, next: NextFunction) => void {
   return (req: Request, res: Response, next: NextFunction): void => {
     void fn(req, res, next);
   };

@@ -1,5 +1,14 @@
 module.exports = {
-  preset: 'ts-jest',
+  transform: {
+    '^.+\\.tsx?$': [
+      'ts-jest',
+      {
+        diagnostics: {
+          ignoreCodes: [5101, 5107],
+        },
+      },
+    ],
+  },
   testEnvironment: 'jsdom',
   roots: ['<rootDir>/pruebas'],
   testMatch: ['**/__tests__/**/*.ts', '**/__tests__/**/*.tsx', '**/?(*.)+(spec|test).ts?(x)'],
