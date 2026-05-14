@@ -20,7 +20,8 @@
     "sourceMap": true,
     "outDir": "./dist",
     "rootDir": ".",
-    "baseUrl": "."
+    "baseUrl": ".",
+    "ignoreDeprecations": "6.0"
   },
   "include": ["src/**/*.ts", "pruebas/**/*.ts", "pruebas/**/*.d.ts"],
   "exclude": ["node_modules", "dist"]
