@@ -1,84 +1,108 @@
-# Base de datos (Prisma + Neon)
+# Base de Datos - Servicio Usuario (Prisma + Neon)
 
-## Objetivo
-Estandarizar el manejo de base de datos del servicio de usuario con Prisma 6.18.0 sobre Neon (PostgreSQL 16), incluyendo:
-- migraciones versionadas,
-- seed,
-- separación de entornos (`dev`, `test`, `prod`),
-- verificación rápida con pruebas de conectividad.
+## Alcance
+Este documento describe el flujo oficial de base de datos para `servicio-usuario`:
+- Prisma `6.18.0`
+- PostgreSQL en Neon
+- Entornos separados: `dev`, `test`, `production`
 
-## Estructura
-- `prisma/schema.prisma`: datasource y configuración de Prisma.
-- `prisma/migrations/20260507210000_init/migration.sql`: baseline inicial del esquema.
-- `prisma/migrations/20260511123000_estandares_63_campos_base/migration.sql`: ajustes de cumplimiento sección 6.3 (campos base y `esta_activo`).
-- `prisma/migrations/20260513090000_estandares_26_booleanos/migration.sql`: ajustes de cumplimiento sección 2.6 (prefijos en booleanos).
-- `prisma/seed.ts`: seed mínimo para validar conectividad.
-- `prisma.config.ts`: configuración central de Prisma (schema + seed).
-- `pruebas/integracion/base-de-datos.test.ts`: prueba de conectividad a BD.
+## Componentes BD
+- `prisma/schema.prisma`: definición actual introspectada desde BD.
+- `prisma/migrations/`: historial versionado de cambios.
+- `prisma/seed.ts`: seed de datos base.
+- `prisma.config.ts`: configura la ruta del schema y el seed para que Prisma CLI los encuentre correctamente en cada entorno.
+- `src/config/base-de-datos.ts`: instancia única de `PrismaClient`.
+- `src/repositorios/`: acceso a datos por entidad.
+- `pruebas/integracion/base-de-datos.test.ts`: conectividad DB.
 
-## Archivos de entorno
-- `.env`: desarrollo.
-- `.env.test`: pruebas/integración.
-- `.env.production`: producción.
-- `.env.example`, `.env.test.example`, `.env.production.example`: plantillas.
+## Repositorios base
+Se proveen tres repositorios de ejemplo en `src/repositorios/`:
+- `usuario-repositorio.ts`
+- `institucion-repositorio.ts`
+- `pregunta-repositorio.ts`
 
-Variables esperadas:
-- `DATABASE_URL`: conexión principal.
-- `SHADOW_DATABASE_URL`: necesaria para operaciones de migración en `dev/test` (`migrate dev`, `migrate reset`).
-- `RUN_DB_INTEGRATION_TESTS`: habilita explícitamente el test de conectividad BD (`true` para ejecutarlo).
+Patrón a seguir para nuevos repositorios:
+- Usar `crearXxxRepositorio(conexionBD)` para permitir inyección de dependencias en tests.
+- Importar tipos directamente desde `@prisma/client`.
+- Nunca instanciar `PrismaClient` dentro del repositorio; usar `src/config/base-de-datos.ts`.
 
-Importante:
-- `SHADOW_DATABASE_URL` no debe ser igual a `DATABASE_URL`.
-- usar bases/branches separados para `dev`, `test` y `prod`.
+## Variables de entorno
+Archivos:
+- `.env` (dev)
+- `.env.test` (test)
+- `.env.production` (production)
+- `.env*.example` (plantillas)
+
+Variables requeridas:
+- `DATABASE_URL`
+- `SHADOW_DATABASE_URL` (obligatoria para `migrate dev` y `migrate reset`)
+- `RUN_DB_INTEGRATION_TESTS` (`true` para ejecutar test de conectividad BD)
+
+Reglas:
+- `SHADOW_DATABASE_URL` debe ser diferente de `DATABASE_URL`.
+- Usar bases separadas por entorno.
 
 ## Scripts disponibles
 - `npm run prisma:generate`: genera Prisma Client.
-- `npm test`: ejecuta `pretest` (`prisma:generate`) y luego pruebas Jest.
-- `npm run db:migrate:dev`: crea/aplica migraciones en entorno local.
-- `npm run db:migrate:deploy`: aplica migraciones en producción.
-- `npm run db:seed`: ejecuta seed en `local`.
+- `npm run db:migrate:dev`: crea/aplica migraciones en `dev`.
+- `npm run db:migrate:deploy`: aplica migraciones en `production`.
+- `npm run db:seed`: ejecuta seed en `dev`.
 - `npm run db:seed:test`: ejecuta seed en `test`.
 - `npm run db:reset:test`: resetea y reaplica migraciones en `test`.
-- `npm run db:test`: ejecuta el test de conectividad BD.
-- `npm run db:smoke:test`: flujo completo en `test`.
+- `npm run db:test`: test de conectividad BD.
+- `npm run db:smoke:test`: generate + reset + seed + test BD + integración.
+- `npm test`: ejecuta `pretest` (`prisma:generate`) y luego Jest.
 
-## Flujo de trabajo recomendado
-1. Actualizar `schema.prisma` o SQL de migración.
-2. Ejecutar `npm run db:migrate:dev`.
-3. Ejecutar `npm run prisma:generate`.
-4. Ejecutar `npm run db:seed`.
-5. Validar con `npm run db:test`.
+## Flujo recomendado por entorno
+1. Dev
+- `npm run db:migrate:dev`
+- `npm run prisma:generate`
+- `npm run db:seed`
+- `npm test`
 
-## Smoke test (todo en uno)
-Comando:
-`npm run db:smoke:test`
+2. Test
+- `npm run db:reset:test`
+- `npm run db:seed:test`
+- `npm run db:test`
+- `npm run test:integration`
 
-Incluye:
-- generate,
-- reset en test,
-- seed en test,
-- test de conectividad BD,
-- tests de integración.
+3. Production
+- `npm run db:migrate:deploy`
 
-## Migración inicial
-- Baseline: `prisma/migrations/20260507210000_init/migration.sql`.
-- Se añadió creación de schema y extensión requeridos:
-`CREATE SCHEMA IF NOT EXISTS "bebras";`
-`CREATE EXTENSION IF NOT EXISTS "pgcrypto";`
+## Flujo para cambios de esquema
+1. Cambiar estructura de BD mediante migración versionada.
+2. Aplicar en `dev` (`db:migrate:dev` o `migrate deploy` según el caso).
+3. Sincronizar `schema.prisma`:
+- `npx prisma db pull --schema prisma/schema.prisma`
+4. Regenerar cliente:
+- `npx prisma generate --schema prisma/schema.prisma`
+5. Validar:
+- `npm run lint && npm test`
 
-## Migración de estandarización 6.3
-- Archivo: `prisma/migrations/20260511123000_estandares_63_campos_base/migration.sql`.
-- Aplica:
-  - renombre `activo` -> `esta_activo`,
-  - columnas `creado_en` y `actualizado_en` donde faltaban,
-  - columna `esta_activo` donde faltaba,
-  - actualización de índices relacionados.
+## Migraciones actuales
+1. `20260507210000_init`
+- Baseline inicial.
+- Crea schema `bebras` y extensión `pgcrypto`.
 
-## Migración de estandarización 2.6
-- Archivo: `prisma/migrations/20260513090000_estandares_26_booleanos/migration.sql`.
-- Aplica:
-  - `usuarios.verificado` -> `usuarios.esta_verificado`,
-  - `notificaciones.leida` -> `notificaciones.esta_leida`,
-  - `respuestas_examen.marcada` -> `respuestas_examen.esta_marcada`,
-  - `examenes.permite_reanudar` -> `examenes.puede_reanudar`,
-  - actualización del índice `idx_notificaciones_esta_leida`.
+2. `20260511123000_estandares_63_campos_base`
+- Cumplimiento estándar 6.3:
+- `activo` -> `esta_activo`
+- `creado_en`, `actualizado_en`, `esta_activo` donde faltaban.
+
+3. `20260513090000_estandares_26_booleanos`
+- Cumplimiento estándar 2.6 (prefijos booleanos):
+- `verificado` -> `esta_verificado`
+- `leida` -> `esta_leida`
+- `marcada` -> `esta_marcada`
+- `permite_reanudar` -> `puede_reanudar`
+
+## Pruebas
+- `pruebas/unitarias/`: tests unitarios de repositorios con mock de PrismaClient.
+- `pruebas/integracion/base-de-datos.test.ts`: conectividad BD real.
+
+## Notas operativas
+- No modificar migraciones ya aplicadas.
+- No ejecutar SQL manual en production fuera de migraciones.
+- `migration_lock.toml` debe permanecer versionado.
+- `db pull` regenera modelos desde la BD real; revisar diff antes de commitear.
+- Todo repositorio nuevo debe incluir sus tests unitarios en `pruebas/unitarias/`.
