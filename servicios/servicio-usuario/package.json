@@ -1,30 +1,42 @@
 {
-  "name": "bebras-bolivia-user-service",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module",
-  "main": "dist/server.js",
-  "scripts": {
-    "dev": "tsx src/server.ts",
-    "build": "tsc",
-    "start": "node dist/server.js",
-    "test": "jest --config jest.config.cjs --runInBand --passWithNoTests",
-    "test:unit": "jest --config jest.config.cjs --runInBand pruebas/unitarias",
-    "test:integration": "jest --config jest.config.cjs --runInBand pruebas/integracion",
-    "lint": "eslint src/**/*.ts"
-  },
-  "dependencies": {
-    "express": "^4.18.2"
-  },
-  "devDependencies": {
-    "@types/express": "^4.17.21",
-    "@types/jest": "^30.0.0",
-    "@types/node": "^20.10.6",
-    "@types/supertest": "^6.0.3",
-    "jest": "^30.3.0",
-    "supertest": "^7.1.4",
-    "ts-jest": "^29.4.5",
-    "tsx": "^4.7.0",
-    "typescript": "^6.0"
-  }
+    "name":  "bebras-bolivia-user-service",
+    "version":  "1.0.0",
+    "private":  true,
+    "type":  "module",
+    "main":  "dist/server.js",
+    "scripts":  {
+                    "dev":  "tsx src/server.ts",
+                    "build":  "tsc",
+                    "start":  "node dist/server.js",
+                    "pretest":  "npm run prisma:generate",
+                    "test":  "jest --config jest.config.cjs --runInBand --passWithNoTests",
+                    "test:unit":  "jest --config jest.config.cjs --runInBand pruebas/unitarias",
+                    "test:integration":  "dotenv -e .env.test -- jest --config jest.config.cjs --runInBand pruebas/integracion",
+                    "lint":  "eslint src/**/*.ts",
+                    "prisma:generate":  "prisma generate --schema prisma/schema.prisma",
+                    "db:migrate:dev":  "dotenv -e .env -- prisma migrate dev --schema prisma/schema.prisma",
+                    "db:migrate:deploy":  "dotenv -e .env.production -- prisma migrate deploy --schema prisma/schema.prisma",
+                    "db:seed":  "dotenv -e .env -- prisma db seed --schema prisma/schema.prisma",
+                    "db:seed:test":  "dotenv -e .env.test -- prisma db seed --schema prisma/schema.prisma",
+                    "db:test":  "dotenv -e .env.test -- jest --config jest.config.cjs --runInBand pruebas/integracion/base-de-datos.test.ts",
+                    "db:reset:test":  "dotenv -e .env.test -- prisma migrate reset --schema prisma/schema.prisma --force --skip-generate",
+                    "db:smoke:test":  "npm run prisma:generate \u0026\u0026 npm run db:reset:test \u0026\u0026 npm run db:seed:test \u0026\u0026 npm run db:test \u0026\u0026 npm run test:integration"
+                },
+    "dependencies":  {
+                         "@prisma/client":  "6.18.0",
+                         "express":  "^4.18.2"
+                     },
+    "devDependencies":  {
+                            "@types/express":  "^4.17.21",
+                            "@types/jest":  "^30.0.0",
+                            "@types/node":  "^20.10.6",
+                            "@types/supertest":  "^6.0.3",
+                            "dotenv-cli":  "^8.0.0",
+                            "jest":  "^30.3.0",
+                            "prisma":  "6.18.0",
+                            "supertest":  "^7.1.4",
+                            "ts-jest":  "^29.4.5",
+                            "tsx":  "^4.7.0",
+                            "typescript":  "^6.0"
+                        }
 }
