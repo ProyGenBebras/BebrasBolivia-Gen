@@ -100,12 +100,12 @@ Reglas:
 - Crea schema `bebras` y extension `pgcrypto`.
 
 `20260511123000_estandares_63_campos_base`
-- Cumplimiento estandar 6.3:
+- Estandarización de campos base:
 - `activo` -> `esta_activo`
 - `creado_en`, `actualizado_en`, `esta_activo` donde faltaban.
 
 `20260513090000_estandares_26_booleanos`
-- Cumplimiento estandar 2.6:
+- Estandarización de variables booleanas:
 - `verificado` -> `esta_verificado`
 - `leida` -> `esta_leida`
 - `marcada` -> `esta_marcada`
