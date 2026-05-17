@@ -133,8 +133,7 @@ export function CrearUsuarioForm(): JSX.Element {
       />
 
       <label htmlFor="rol" style={estilos.label}>
-        Rol *
-        <select
+        Rol * <select
           id="rol"
           value={rol}
           onChange={(e) => setRol(e.target.value as RolUsuario)}
@@ -174,14 +173,14 @@ export function CrearUsuarioForm(): JSX.Element {
   );
 }
 
-interface PropsCampo {
+type PropsCampo = Readonly<{
   label: string;
   id: string;
   type?: string;
   value: string;
   onChange: (valor: string) => void;
   error?: string;
-}
+}>;
 
 function Campo({ label, id, type = 'text', value, onChange, error }: PropsCampo): JSX.Element {
   return (
