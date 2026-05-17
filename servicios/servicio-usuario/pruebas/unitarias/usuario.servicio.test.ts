@@ -1,4 +1,4 @@
-import { UsuarioRepositorio } from '../../src/repositorios/usuario.repositorio';
+import { usuarioRepositorio } from '../../src/repositorios/usuario-repositorio';
 import { UsuarioServicio } from '../../src/servicios/usuario.servicio';
 import { ErrorNegocio } from '../../src/utilidades/errores';
 import type { CrearUsuarioDto } from '../../src/dtos/crear-usuario.dto';
@@ -14,11 +14,36 @@ const dtoBase: CrearUsuarioDto = {
 };
 
 describe('UsuarioServicio', () => {
-  let repositorio: UsuarioRepositorio;
+  let repositorio: typeof usuarioRepositorio;
   let servicio: UsuarioServicio;
 
   beforeEach(() => {
-    repositorio = new UsuarioRepositorio();
+    const usuariosGuardados: any[] = [];
+
+    repositorio = {
+      buscarPorId: async (id) => usuariosGuardados.find(u => u.id === id) || null,
+      buscarPorCorreo: async (correo) => usuariosGuardados.find(u => u.correo === correo) || null,
+      buscarPorNombreUsuario: async (nombre) => usuariosGuardados.find(u => u.nombre_usuario === nombre) || null,
+      crear: async (datos) => {
+        const nuevo = {
+          id: 'uuid-falso-123',
+          correo: datos.correo,
+          nombre_usuario: datos.nombreUsuario || null,
+          contrasena_hash: datos.contrasenaHash,
+          rol: datos.rol,
+          nombres: datos.nombres,
+          apellidos: datos.apellidos,
+          telefono: datos.telefono || null,
+          esta_activo: true,
+          esta_verificado: false,
+          creado_en: new Date(),
+          actualizado_en: new Date(),
+        };
+        usuariosGuardados.push(nuevo);
+        return nuevo as any;
+      }
+    };
+
     servicio = new UsuarioServicio(repositorio);
   });
 
