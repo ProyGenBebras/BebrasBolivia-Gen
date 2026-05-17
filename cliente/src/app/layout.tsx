@@ -1,15 +1,15 @@
 import type { Metadata } from 'next';
-import type { ReactNode } from 'react';
+import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Bebras Bolivia',
-  description: 'Plataforma del concurso Bebras Bolivia',
+  title: 'Bebras Bolivia | Plataforma de Gestión',
+  description: 'Sistema de administración y evaluación para la competencia Bebras',
 };
 
-export default function RootLayout({ children }: { children: ReactNode }): JSX.Element {
+export default function RootLayout({ children }: { children: React.ReactNode }): React.ReactNode {
   return (
     <html lang="es">
-      <body>{children}</body>
+      <body className="antialiased min-h-screen bg-gray-50 text-gray-900">{children}</body>
     </html>
   );
 }
