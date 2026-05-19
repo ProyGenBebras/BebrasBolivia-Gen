@@ -2,16 +2,17 @@
 
 import { useState } from 'react';
 
-import type { RolVista } from '../../../modulos/user/aplicacion/mappers/rol.mapper';
-import type { UsuarioResumen } from '../../../modulos/user/dominio/rol';
 import { Badge } from '../atoms/Badge';
+
+import { RolVista } from '@/modulos/Roles/aplicacion/mappers/rol.mapper';
+import { UsuarioResumen } from '@/modulos/Roles/dominio/rol';
 
 interface TablaAsignacionProps {
   usuarios: UsuarioResumen[];
   roles: RolVista[];
   rolActualId: number;
   onAsignar: (usuarioId: number, rolId: number) => Promise<void>;
-  cargando: boolean;
+  estaCargando: boolean;
 }
 
 export function TablaAsignacion({
@@ -19,7 +20,7 @@ export function TablaAsignacion({
   roles,
   rolActualId,
   onAsignar,
-  cargando,
+  estaCargando,
 }: TablaAsignacionProps): JSX.Element {
   const [asignando, setAsignando] = useState<number | null>(null);
   const [busqueda, setBusqueda] = useState('');
@@ -42,7 +43,7 @@ export function TablaAsignacion({
     }
   };
 
-  if (cargando) {
+  if (estaCargando) {
     return (
       <div className="flex h-48 items-center justify-center">
         <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-300 border-t-slate-700" />
