@@ -4,7 +4,6 @@ import { useState } from 'react';
 
 import type { RolVista } from '../../../modulos/user/aplicacion/mappers/rol.mapper';
 import type { UsuarioResumen } from '../../../modulos/user/dominio/rol';
-
 import { Badge } from '../atoms/Badge';
 
 interface TablaAsignacionProps {

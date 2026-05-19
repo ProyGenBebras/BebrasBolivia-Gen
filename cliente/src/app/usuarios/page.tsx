@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+
 import { GestionUsuarios } from '../../modulos/user/ui/pages/GestionUsuarios';
 
 export const metadata: Metadata = {

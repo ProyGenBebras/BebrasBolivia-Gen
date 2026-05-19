@@ -5,7 +5,6 @@ import { useCallback, useEffect, useState } from 'react';
 import { Badge } from '../../../../compartido/ui/atoms/Badge';
 import { RolCard } from '../../../../compartido/ui/molecules/RolCard';
 import { TablaAsignacion } from '../../../../compartido/ui/organisms/TablaAsignacion';
-
 import { mapearRolesAVista, type RolVista } from '../../aplicacion/mappers/rol.mapper';
 import type { CrearRolPayload, UsuarioResumen } from '../../dominio/rol';
 import { rolApi } from '../../infraestructura/api/rol.api';

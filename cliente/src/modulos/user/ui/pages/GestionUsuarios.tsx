@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+
 import type { Usuario } from '../../dominio/usuario';
 import { usuarioApi } from '../../infraestructura/api/usuario.api';
 
@@ -10,7 +11,7 @@ export function GestionUsuarios(): JSX.Element {
   const [errorGlobal, setErrorGlobal] = useState<string | null>(null);
   const [cambiando, setCambiando] = useState<number | null>(null);
 
-  const cargarUsuarios = useCallback(async (): Promise<void> => {
+  const cargarUsuarios = useCallback((): void => {
     setCargando(true);
     setErrorGlobal(null);
     try {
