@@ -1,4 +1,5 @@
 ﻿import { PrismaClient } from '@prisma/client';
+
 import type { UsuarioEnRol } from '../modelos/rol.modelo.js';
 
 export class UsuarioRepositorio {

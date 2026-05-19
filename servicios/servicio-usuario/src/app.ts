@@ -1,5 +1,6 @@
 ﻿import cors from 'cors';
 import express, { type Application, type ErrorRequestHandler, type RequestHandler } from 'express';
+
 import rolRutas from './rutas/rol.rutas.js';
 import usuarioRutas from './rutas/usuario.rutas.js';
 import { ErrorNegocio } from './utilidades/errores.js';

@@ -1,4 +1,5 @@
 ﻿import { PrismaClient, rol_usuario } from '@prisma/client';
+
 import type { ActualizarRolDto, AsignarRolDto, CrearRolDto } from '../dtos/rol.dto.js';
 import type { Rol, RolConUsuarios, UsuarioEnRol } from '../modelos/rol.modelo.js';
 
