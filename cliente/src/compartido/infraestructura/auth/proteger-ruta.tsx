@@ -3,12 +3,12 @@
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
-import { Permiso } from './permisos';
-import { RolUsuario } from './roles';
+import type { Permiso } from './permisos';
+import type { RolUsuario } from './roles';
 import { tienePermiso } from './validar-permiso';
 
 type Propiedades = {
-  rolUsuario?: RolUsuario;
+  rolUsuario?: RolUsuario | null;
   permisoRequerido: Permiso;
   children: React.ReactNode;
 };
@@ -20,20 +20,26 @@ export function ProtegerRuta({
 }: Propiedades): React.ReactElement | null {
   const router = useRouter();
 
+  const usuarioNoAutenticado = !rolUsuario;
+  const usuarioSinPermiso =
+    rolUsuario !== null &&
+    rolUsuario !== undefined &&
+    !tienePermiso(rolUsuario, permisoRequerido);
+
   useEffect(() => {
-    if (!rolUsuario) {
-      router.push('/login');
+    if (usuarioNoAutenticado) {
+      router.push('/acceso-denegado?motivo=no-autenticado');
       return;
     }
 
-    if (!tienePermiso(rolUsuario, permisoRequerido)) {
-      router.push('/acceso-denegado');
+    if (usuarioSinPermiso) {
+      router.push('/acceso-denegado?motivo=sin-permiso');
     }
-  }, [rolUsuario, permisoRequerido, router]);
+  }, [usuarioNoAutenticado, usuarioSinPermiso, router]);
 
-  if (!rolUsuario) return null;
-
-  if (!tienePermiso(rolUsuario, permisoRequerido)) return null;
+  if (usuarioNoAutenticado || usuarioSinPermiso) {
+    return null;
+  }
 
   return <>{children}</>;
 }

@@ -1,8 +1,8 @@
-export type RolUsuario = 'administrador' | 'examinador' | 'profesor' | 'estudiante';
+export type RolUsuario = 'administrador' | 'coordinador' | 'profesor' | 'estudiante';
 
 export const ROLES = {
   ADMINISTRADOR: 'administrador',
-  EXAMINADOR: 'coordinador',
+  COORDINADOR: 'coordinador',
   PROFESOR: 'profesor',
   ESTUDIANTE: 'estudiante',
-} as const;
+} as const satisfies Record<string, RolUsuario>;
