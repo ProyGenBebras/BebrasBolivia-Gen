@@ -4,9 +4,9 @@
  */
 
 import express, { type Application, type ErrorRequestHandler, type RequestHandler } from 'express';
-import usuarioRutas from './rutas/usuario.rutas';
 
-import usuarioRutas from './rutas/usuario-rutas';
+import usuarioRutasLegacy from './rutas/usuario-rutas';
+import usuarioRutas from './rutas/usuario.rutas';
 import { ErrorNegocio } from './utilidades/errores';
 
 interface ErrorConEstado extends Error {
@@ -41,7 +41,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Rutas
-app.use('/usuarios', usuarioRutas);
+app.use('/usuarios', usuarioRutasLegacy);
 
 // Rutas básicas (placeholder)
 app.get('/health', (_req, res) => {

@@ -1,5 +1,5 @@
-import { UsuarioRepositorio } from '../repositorios/usuario.repositorio';
 import { Usuario } from '../modelos/usuario';
+import { UsuarioRepositorio } from '../repositorios/usuario.repositorio';
 
 export class UsuarioServicio {
   constructor(private usuarioRepositorio: UsuarioRepositorio) {}

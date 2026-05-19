@@ -1,4 +1,5 @@
 import { Usuario } from '../modelos/usuario';
+
 import { UsuarioRepositorio } from './usuario.repositorio';
 
 export class UsuarioRepositorioMock implements UsuarioRepositorio {
