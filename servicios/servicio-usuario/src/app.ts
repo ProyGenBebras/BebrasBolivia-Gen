@@ -26,9 +26,12 @@ const notFoundHandler: RequestHandler = (_req, res): void => {
   res.status(404).json({ error: 'Ruta no encontrada', status: 404 });
 };
 
-const errorHandler: ErrorRequestHandler = (err: ErrorNegocio, _req, res, _next): void => {
+const errorHandler: ErrorRequestHandler = (err: ErrorConEstado, _req, res, _next): void => {
   console.error('Error:', err);
-  const status = err.status ?? 500;
+
+  // ErrorNegocio (errores controlados de dominio) usa la propiedad `codigo`.
+  // Se conserva el soporte de `status` para errores ya existentes.
+  const status = err instanceof ErrorNegocio ? err.codigo : (err.status ?? 500);
   const message = err.message ?? 'Error interno del servidor';
   res.status(status).json({ error: message, status });
 };

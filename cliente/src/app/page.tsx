@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-export default function HomePage() {
+export default function HomePage(): React.ReactNode {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-slate-50">
       <div className="text-center">
