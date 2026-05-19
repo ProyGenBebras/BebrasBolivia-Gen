@@ -1,42 +1,41 @@
-import type {
-  ActualizarRolPayload,
-  AsignarRolPayload,
-  CrearRolPayload,
-  Rol,
-  UsuarioResumen,
-} from '../../dominio/rol';
+import { USER_SERVICE_URL } from './config';
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4102/api/v1';
+import type { RolUsuario, Usuario } from '@/modulos/Usuarios/dominio/usuario';
 
-async function peticion<T>(ruta: string, opciones?: RequestInit): Promise<T> {
-  const respuesta = await fetch(`${BASE_URL}${ruta}`, {
-    headers: { 'Content-Type': 'application/json' },
-    ...opciones,
-  });
-
-  if (!respuesta.ok) {
-    const cuerpo = (await respuesta.json()) as { error?: string };
-    throw new Error(cuerpo.error ?? `Error ${respuesta.status}`);
-  }
-
-  const json = (await respuesta.json()) as { data: T };
-  return json.data;
-}
+const API_BASE_URL = USER_SERVICE_URL;
 
 export const rolApi = {
-  listar: (): Promise<Rol[]> => peticion<Rol[]>('/roles'),
+  // 1. Obtener los usuarios que tienen un rol específico
+  obtenerUsuariosPorRol: async (rol: RolUsuario): Promise<Usuario[]> => {
+    const respuesta = await fetch(`${API_BASE_URL}/api/v1/roles/${rol}/usuarios`);
 
-  obtenerPorId: (id: number): Promise<Rol> => peticion<Rol>(`/roles/${id}`),
+    if (!respuesta.ok) {
+      throw new Error('Error al obtener los usuarios');
+    }
 
-  obtenerUsuarios: (rolId: number): Promise<UsuarioResumen[]> =>
-    peticion<UsuarioResumen[]>(`/roles/${rolId}/usuarios`),
+    // Le decimos a TypeScript exactamente qué forma tiene el JSON
+    const json = (await respuesta.json()) as { data: Usuario[] };
+    return json.data;
+  },
 
-  crear: (datos: CrearRolPayload): Promise<Rol> =>
-    peticion<Rol>('/roles', { method: 'POST', body: JSON.stringify(datos) }),
+  // 2. Cambiar el rol de un usuario existente
+  asignarRol: async (usuarioId: string, nuevoRol: RolUsuario): Promise<Usuario> => {
+    const respuesta = await fetch(`${API_BASE_URL}/api/v1/roles/asignar`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ usuarioId, nuevoRol }),
+    });
 
-  actualizar: (id: number, datos: ActualizarRolPayload): Promise<Rol> =>
-    peticion<Rol>(`/roles/${id}`, { method: 'PUT', body: JSON.stringify(datos) }),
+    if (!respuesta.ok) {
+      // También tipamos la respuesta de error
+      const errorJson = (await respuesta.json()) as { error?: string };
+      throw new Error(errorJson.error ?? 'Error al asignar el nuevo rol');
+    }
 
-  asignar: (datos: AsignarRolPayload): Promise<void> =>
-    peticion<void>('/roles/asignar', { method: 'POST', body: JSON.stringify(datos) }),
+    // Le decimos a TypeScript que aquí esperamos un solo Usuario dentro de "data"
+    const json = (await respuesta.json()) as { data: Usuario };
+    return json.data;
+  },
 };

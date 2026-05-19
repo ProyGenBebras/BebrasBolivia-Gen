@@ -1,36 +1,23 @@
-export interface Rol {
-  id: number;
-  nombre: string;
-  descripcion: string | null;
-  activo: boolean;
-  createdAt: string;
-  updatedAt: string;
-  _count?: {
-    usuarios: number;
-  };
-}
+export type RolUsuario = 'administrador' | 'coordinador' | 'profesor' | 'estudiante';
 
+export const ROLES_DISPONIBLES: { etiqueta: string; valor: RolUsuario }[] = [
+  { etiqueta: 'Administrador', valor: 'administrador' },
+  { etiqueta: 'Coordinador', valor: 'coordinador' },
+  { etiqueta: 'Profesor', valor: 'profesor' },
+  { etiqueta: 'Estudiante', valor: 'estudiante' },
+];
+
+// 2. Actualizamos el resumen del usuario para coincidir con la nueva base de datos
 export interface UsuarioResumen {
-  id: number;
-  nombre: string;
+  id: string;
+  nombres: string;
   apellidos: string;
-  email: string;
-  activo: boolean;
-  createdAt: string;
+  correo: string;
+  rol: RolUsuario;
 }
 
-export interface CrearRolPayload {
-  nombre: string;
-  descripcion?: string;
-}
-
-export interface ActualizarRolPayload {
-  nombre?: string;
-  descripcion?: string;
-  activo?: boolean;
-}
-
-export interface AsignarRolPayload {
-  usuarioId: number;
-  rolId: number;
+// 3.  Asignar un rol a un usuario
+export interface CambiarRolPayload {
+  usuarioId: string;
+  nuevoRol: RolUsuario;
 }
