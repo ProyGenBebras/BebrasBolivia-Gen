@@ -1,4 +1,5 @@
 import type { Request, Response } from 'express';
+
 import type { CargaMasivaServicio } from '../servicios/carga-masiva.servicio.js';
 
 interface RequestConArchivo extends Request {
@@ -17,7 +18,6 @@ export class CargaMasivaControlador {
       res.status(400).json({ error: 'No se recibio ningun archivo' });
       return;
     }
-
     const resultado = await this.cargaMasivaServicio.procesarArchivo(req.file.buffer);
     res.status(200).json(resultado);
   }
