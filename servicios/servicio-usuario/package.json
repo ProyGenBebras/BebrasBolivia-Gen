@@ -1,4 +1,41 @@
 {
+  "name": "bebras-bolivia-user-service",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "tsx src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "test": "jest --config jest.config.cjs --runInBand --passWithNoTests",
+    "test:unit": "jest --config jest.config.cjs --runInBand pruebas/unitarias",
+    "test:integration": "jest --config jest.config.cjs --runInBand pruebas/integracion",
+    "lint": "eslint src/**/*.ts",
+    "db:generate": "prisma generate --schema=schema.prisma",
+    "db:push": "prisma db push --schema=schema.prisma",
+    "seed": "tsx base-de-datos/semillas/roles.seed.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.22.0",
+    "@types/cors": "^2.8.19",
+    "cors": "^2.8.6",
+    "express": "^4.18.2",
+    "prisma": "^5.22.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^20.10.6",
+    "@types/supertest": "^6.0.3",
+    "jest": "^30.3.0",
+    "supertest": "^7.1.4",
+    "ts-jest": "^29.4.5",
+    "tsx": "^4.7.0",
+    "typescript": "^6.0"
+  }
+}
+{
     "name":  "bebras-bolivia-user-service",
     "version":  "1.0.0",
     "private":  true,
