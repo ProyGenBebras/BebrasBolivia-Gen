@@ -41,18 +41,17 @@ export class UsuarioService {
       return usuario;
     }
 
-    // Validaciones para roles que requieren datos adicionales
+    // Validaciones roles estudiante y profesoe
     if (nuevoRol === RolUsuario.estudiante) {
       if (datosAdicionales.grado === undefined || !datosAdicionales.seccion) {
         throw new Error('Faltan datos requeridos para el rol de estudiante (grado, seccion)');
       }
     } else if (nuevoRol === RolUsuario.profesor) {
-      // Especialidad puede ser opcional, pero institucion_id se esperaría
     }
 
-    // Ejecutar actualización en transacción
+    // Ejecutar actualización en transacción prisma
     await prisma.$transaction(async (tx) => {
-      // 1. Limpiar extensiones viejas si es necesario
+      // 1. Limpiar extensiones viejas si es necesario, tipo si el estudiante se cambia a profesor
       if (usuario.rol === RolUsuario.estudiante) {
         await tx.estudiante.delete({ where: { usuarioId: id } }).catch(() => { });
       } else if (usuario.rol === RolUsuario.profesor) {
