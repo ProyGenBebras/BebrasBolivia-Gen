@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
+
 import type { ErrorFila, ResultadoCargaMasiva } from '../../dominio/usuario';
 import { usuarioApi } from '../../infraestructura/api/usuario.api';
 
@@ -431,7 +432,7 @@ export function CargaMasiva(): JSX.Element {
                     </tr>
                   </thead>
                   <tbody>
-                    {resultado.errores.map((error: ErrorFila, i: number) => (
+                    {resultado.errores.map((error: ErrorFila) => (
                       <tr key={error.fila} style={{ borderTop: '1px solid #f5f3ef' }}>
                         <td
                           style={{

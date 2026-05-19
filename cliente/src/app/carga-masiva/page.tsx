@@ -4,6 +4,6 @@ export const metadata = {
   title: 'Carga masiva de usuarios',
 };
 
-export default function PaginaCargaMasiva() {
+export default function PaginaCargaMasiva(): JSX.Element {
   return <CargaMasiva />;
 }
