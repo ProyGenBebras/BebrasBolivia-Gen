@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 
-import { GestionRoles } from '@/modulos/Roles/ui/pages/GestionRoles';
+import { GestionRoles } from '../../modulos/user/ui/pages/GestionRoles';
 
 export const metadata: Metadata = {
   title: 'Gestión de Roles | BebrasBolivia',

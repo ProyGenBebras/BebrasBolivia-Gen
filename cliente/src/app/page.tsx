@@ -14,6 +14,12 @@ export default function HomePage(): React.ReactNode {
             <span>⬡</span>
             Gestión de Roles
           </Link>
+          <Link
+            href="/usuarios"
+            className="inline-flex items-center gap-2 rounded-xl bg-slate-700 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-500"
+          >
+            Gestión de Usuarios
+          </Link>
         </div>
       </div>
     </main>
