@@ -58,12 +58,8 @@ export const crearUsuarioControlador = (
 
   async eliminar(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const idSolicitante = req.headers['x-usuario-id'];
-
-      if (!idSolicitante || typeof idSolicitante !== 'string') {
-        res.status(400).json({ mensaje: 'Falta el identificador del solicitante' });
-        return;
-      }
+      // req.usuario es garantizado por resolverIdentidad antes de llegar aqui
+      const idSolicitante = req.usuario!.id;
 
       await servicio.eliminarUsuario(req.params.id, idSolicitante);
       res.status(200).json({ mensaje: 'Usuario eliminado correctamente' });
