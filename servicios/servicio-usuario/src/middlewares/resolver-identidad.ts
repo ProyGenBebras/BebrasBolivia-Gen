@@ -10,14 +10,14 @@ type ConexionBD = Pick<PrismaClient, 'usuarios'>;
 export const crearResolverIdentidad = (conexionBD: ConexionBD): RequestHandler =>
   async (req, _res, next): Promise<void> => {
     try {
-      const idRaw = req.headers['x-usuario-id'];
+      const idSinProcesar = req.headers['x-usuario-id'];
 
-      if (!idRaw || typeof idRaw !== 'string' || idRaw.trim() === '') {
+      if (!idSinProcesar || typeof idSinProcesar !== 'string' || idSinProcesar.trim() === '') {
         next(new ErrorNoAutenticado());
         return;
       }
 
-      const id = idRaw.trim();
+      const id = idSinProcesar.trim();
 
       const registro = await conexionBD.usuarios.findUnique({
         where: { id },

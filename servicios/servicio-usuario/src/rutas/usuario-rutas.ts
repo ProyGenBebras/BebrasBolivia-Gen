@@ -1,7 +1,7 @@
 import { Router } from 'express';
 
 import { usuarioControlador } from '../controladores/usuario-controlador';
-import { requierePermiso, requiereRol } from '../middlewares/autorizar';
+import { verificarPermiso, verificarRol } from '../middlewares/autorizar';
 import { resolverIdentidad } from '../middlewares/resolver-identidad';
 import { Accion } from '../shared/permisos';
 
@@ -18,7 +18,7 @@ const usuarioRutas: Router = Router();
 usuarioRutas.post(
   '/',
   resolverIdentidad,
-  requierePermiso(Accion.CREAR_USUARIO),
+  verificarPermiso(Accion.CREAR_USUARIO),
   (req, res, next) => {
     void usuarioControlador.crear(req, res, next);
   },
@@ -27,7 +27,7 @@ usuarioRutas.post(
 usuarioRutas.delete(
   '/:id',
   resolverIdentidad,
-  requiereRol('administrador'),
+  verificarRol('administrador'),
   (req, res, next) => {
     void usuarioControlador.eliminar(req, res, next);
   },

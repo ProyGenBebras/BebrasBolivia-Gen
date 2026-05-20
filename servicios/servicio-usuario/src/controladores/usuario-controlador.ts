@@ -58,7 +58,9 @@ export const crearUsuarioControlador = (
 
   async eliminar(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      // req.usuario es garantizado por resolverIdentidad antes de llegar aqui
+      // MODIFICADO (middleware de autorizacion):
+      // Se reemplazo la lectura manual del header 'x-usuario-id' por req.usuario.id.
+      // La identidad del solicitante ahora la garantiza resolverIdentidad antes de esta ruta.
       const idSolicitante = req.usuario!.id;
 
       await servicio.eliminarUsuario(req.params.id, idSolicitante);

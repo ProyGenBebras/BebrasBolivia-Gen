@@ -4,11 +4,7 @@ import type { RequestHandler } from 'express';
 import { Accion, PERMISOS_POR_ROL } from '../shared/permisos';
 import { ErrorNoAutenticado, ErrorProhibido } from '../utilidades/errores';
 
-/**
- * Verifica que el solicitante tenga uno de los roles indicados.
- * Debe ir despues de resolverIdentidad en la cadena de middlewares.
- */
-export const requiereRol =
+export const verificarRol =
   (...roles: rol_usuario[]): RequestHandler =>
   (req, _res, next): void => {
     if (!req.usuario) {
@@ -24,11 +20,7 @@ export const requiereRol =
     next();
   };
 
-/**
- * Verifica que el rol del solicitante tenga la accion requerida segun la matriz de permisos.
- * Debe ir despues de resolverIdentidad en la cadena de middlewares.
- */
-export const requierePermiso =
+export const verificarPermiso =
   (accion: Accion): RequestHandler =>
   (req, _res, next): void => {
     if (!req.usuario) {

@@ -2,13 +2,11 @@ import express, { type ErrorRequestHandler, Router } from 'express';
 import request from 'supertest';
 
 import { crearUsuarioControlador } from '../../src/controladores/usuario-controlador';
-import { requierePermiso, requiereRol } from '../../src/middlewares/autorizar';
+import { verificarPermiso, verificarRol } from '../../src/middlewares/autorizar';
 import { crearResolverIdentidad } from '../../src/middlewares/resolver-identidad';
 import { crearUsuarioServicio } from '../../src/servicios/usuario-servicio';
 import { Accion } from '../../src/shared/permisos';
 import { ErrorNegocio } from '../../src/utilidades/errores';
-
-// ─── Fixtures ────────────────────────────────────────────────────────────────
 
 const usuarioAdmin = {
   id: 'uuid-admin-001',
@@ -71,11 +69,11 @@ const crearAppDePrueba = (usuarioBD: unknown) => {
   const controlador = crearUsuarioControlador(servicio);
   const router = Router();
 
-  router.post('/', resolver, requierePermiso(Accion.CREAR_USUARIO), (req, res, next) => {
+  router.post('/', resolver, verificarPermiso(Accion.CREAR_USUARIO), (req, res, next) => {
     void controlador.crear(req, res, next);
   });
 
-  router.delete('/:id', resolver, requiereRol('administrador'), (req, res, next) => {
+  router.delete('/:id', resolver, verificarRol('administrador'), (req, res, next) => {
     void controlador.eliminar(req, res, next);
   });
 
