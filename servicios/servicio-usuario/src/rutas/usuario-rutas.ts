@@ -1,6 +1,9 @@
 import { Router } from 'express';
 
 import { usuarioControlador } from '../controladores/usuario-controlador';
+import { verificarPermiso, verificarRol } from '../middlewares/autorizar';
+import { resolverIdentidad } from '../middlewares/resolver-identidad';
+import { Accion } from '../shared/permisos';
 
 /**
  * Rutas del modulo de usuarios.
@@ -12,12 +15,22 @@ import { usuarioControlador } from '../controladores/usuario-controlador';
  */
 const usuarioRutas: Router = Router();
 
-usuarioRutas.post('/', (req, res, next) => {
-  void usuarioControlador.crear(req, res, next);
-});
+usuarioRutas.post(
+  '/',
+  resolverIdentidad,
+  verificarPermiso(Accion.CREAR_USUARIO),
+  (req, res, next) => {
+    void usuarioControlador.crear(req, res, next);
+  },
+);
 
-usuarioRutas.delete('/:id', (req, res, next) => {
-  void usuarioControlador.eliminar(req, res, next);
-});
+usuarioRutas.delete(
+  '/:id',
+  resolverIdentidad,
+  verificarRol('administrador'),
+  (req, res, next) => {
+    void usuarioControlador.eliminar(req, res, next);
+  },
+);
 
 export default usuarioRutas;
