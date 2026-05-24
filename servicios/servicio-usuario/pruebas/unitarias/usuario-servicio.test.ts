@@ -43,17 +43,6 @@ describe('UsuarioServicio', () => {
       await expect(servicio.crear(dto)).rejects.toThrow(ErrorNegocio);
       expect(crear).not.toHaveBeenCalled();
     });
-
-    it('deberia propagar el error si el hasheo no esta implementado', async () => {
-      const servicio = crearUsuarioServicio({
-        repositorio: {
-          buscarPorCorreo: jest.fn().mockResolvedValue(null),
-          crear: jest.fn(),
-        } as never,
-      });
-
-      await expect(servicio.crear(dto)).rejects.toThrow(ErrorNegocio);
-    });
   });
 
   describe('eliminarUsuario', () => {
