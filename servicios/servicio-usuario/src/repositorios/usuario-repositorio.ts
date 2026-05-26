@@ -14,6 +14,7 @@ type UsuarioRepositorio = {
   buscarPorCorreo(correo: string): Promise<usuarios | null>;
   crear(datos: DatosCrearUsuario): Promise<usuarios>;
   eliminar(id: string): Promise<usuarios>;
+  actualizarEstadoActivo(id: string, estaActivo: boolean): Promise<usuarios>;
 };
 
 export const crearUsuarioRepositorio = (conexionBD: ConexionBD): UsuarioRepositorio => ({
@@ -33,6 +34,13 @@ export const crearUsuarioRepositorio = (conexionBD: ConexionBD): UsuarioReposito
     return conexionBD.usuarios.update({
       where: { id },
       data: { esta_activo: false },
+    });
+  },
+
+  async actualizarEstadoActivo(id: string, estaActivo: boolean): Promise<usuarios> {
+    return conexionBD.usuarios.update({
+      where: { id },
+      data: { esta_activo: estaActivo, actualizado_en: new Date() },
     });
   },
 });

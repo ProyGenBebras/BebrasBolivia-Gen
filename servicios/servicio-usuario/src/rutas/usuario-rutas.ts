@@ -15,6 +15,7 @@ import { Accion } from '../shared/permisos';
  */
 const usuarioRutas: Router = Router();
 
+// POST /api/v1/usuarios — crear usuario
 usuarioRutas.post(
   '/',
   resolverIdentidad,
@@ -24,12 +25,33 @@ usuarioRutas.post(
   },
 );
 
+// DELETE /api/v1/usuarios/:id — eliminar usuario (logico)
 usuarioRutas.delete(
   '/:id',
   resolverIdentidad,
   verificarRol('administrador'),
   (req, res, next) => {
     void usuarioControlador.eliminar(req, res, next);
+  },
+);
+
+// GET /api/v1/usuarios/:id/rol — obtener rol actual del usuario (REQ-08)
+usuarioRutas.get(
+  '/:id/rol',
+  resolverIdentidad,
+  verificarRol('administrador'),
+  (req, res, next) => {
+    void usuarioControlador.obtenerRolUsuario(req, res, next);
+  },
+);
+
+// PATCH /api/v1/usuarios/:id/rol — cambiar rol con validaciones completas (REQ-08)
+usuarioRutas.patch(
+  '/:id/rol',
+  resolverIdentidad,
+  verificarRol('administrador'),
+  (req, res, next) => {
+    void usuarioControlador.modificarRolUsuario(req, res, next);
   },
 );
 
