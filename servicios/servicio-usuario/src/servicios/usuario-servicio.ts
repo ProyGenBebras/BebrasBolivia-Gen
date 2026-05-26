@@ -35,6 +35,7 @@ interface DependenciasUsuarioServicio {
 interface UsuarioServicio {
   crear(dto: CrearUsuarioDto): Promise<usuarios>;
   eliminarUsuario(idUsuario: string, idSolicitante: string): Promise<usuarios>;
+  cambiarEstadoUsuario(idUsuario: string, idSolicitante: string, estaActivo: boolean): Promise<usuarios>;
 }
 
 export const crearUsuarioServicio = (
@@ -85,6 +86,30 @@ export const crearUsuarioServicio = (
       }
 
       return repositorio.eliminar(idUsuario);
+    },
+
+    /**
+     * Activa o desactiva un usuario.
+     * Solo un administrador puede realizar esta accion.
+     */
+    async cambiarEstadoUsuario(
+      idUsuario: string,
+      idSolicitante: string,
+      estaActivo: boolean,
+    ): Promise<usuarios> {
+      const solicitante = await repositorio.buscarPorId(idSolicitante);
+
+      if (!solicitante || solicitante.rol !== 'administrador') {
+        throw new ErrorNegocio('No tiene permisos para cambiar el estado del usuario', 403);
+      }
+
+      const usuario = await repositorio.buscarPorId(idUsuario);
+
+      if (!usuario) {
+        throw new ErrorNegocio('Usuario no encontrado', 404);
+      }
+
+      return repositorio.actualizarEstadoActivo(idUsuario, estaActivo);
     },
   };
 };

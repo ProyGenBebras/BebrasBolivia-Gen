@@ -2,7 +2,7 @@ import cors from 'cors';
 import express from 'express';
 
 import rutasRol from './rutas/rol-rutas';
-import rutasUsuario from './rutas/usuario.rutas'; 
+import rutasUsuario from './rutas/usuario-rutas';
 
 const app = express();
 
