@@ -6,13 +6,11 @@
  */
 export class ErrorNegocio extends Error {
   public readonly codigo: number;
-  public readonly status: number;
 
   constructor(mensaje: string, codigo = 400) {
     super(mensaje);
     this.name = 'ErrorNegocio';
     this.codigo = codigo;
-    this.status = codigo;
   }
 }
 

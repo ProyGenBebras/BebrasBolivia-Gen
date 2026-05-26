@@ -3,5 +3,4 @@ export interface Usuario {
   nombre: string;
   email: string;
   fechaCreacion: Date;
-  estaActivo: boolean;
 }

@@ -34,7 +34,7 @@ describe('validarCrearUsuario', () => {
   });
 
   it('deberia lanzar ErrorNegocio cuando falta el correo', () => {
-    const sinCorreo = { ...cuerpoValido, correo: '' };
+    const { correo: _correo, ...sinCorreo } = cuerpoValido;
 
     expect(() => validarCrearUsuario(sinCorreo)).toThrow('El correo es obligatorio');
   });

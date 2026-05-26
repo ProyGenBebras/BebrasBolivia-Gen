@@ -7,8 +7,4 @@ export class UsuarioServicio {
   async obtenerUsuarios(): Promise<Usuario[]> {
     return this.usuarioRepositorio.listar();
   }
-
-  async cambiarEstadoUsuario(id: string, estaActivo: boolean): Promise<Usuario> {
-    return this.usuarioRepositorio.cambiarEstado(id, estaActivo);
-  }
 }
