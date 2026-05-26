@@ -1,18 +1,17 @@
 import { Router } from 'express';
 import multer from 'multer';
 
-import { usuarioControlador } from '../controladores/usuario-controlador';
 import { CargaMasivaControlador }
 from '../controladores/carga-masiva.controlador';
-
+import { usuarioControlador }
+from '../controladores/usuario-controlador';
 import {
   verificarPermiso,
   verificarRol,
-} from '../middlewares/autorizar';
-
+}
+from '../middlewares/autorizar';
 import { resolverIdentidad }
 from '../middlewares/resolver-identidad';
-
 import { Accion }
 from '../shared/permisos';
 
