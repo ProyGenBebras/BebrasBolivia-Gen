@@ -8,6 +8,7 @@ export enum Accion {
   // Usuarios
   CREAR_USUARIO = 'CREAR_USUARIO',
   ELIMINAR_USUARIO = 'ELIMINAR_USUARIO',
+  ACTIVAR_DESACTIVAR_USUARIO = 'ACTIVAR_DESACTIVAR_USUARIO',
   LISTAR_USUARIOS = 'LISTAR_USUARIOS',
   VER_USUARIO = 'VER_USUARIO',
   EDITAR_USUARIO_PROPIO = 'EDITAR_USUARIO_PROPIO',
@@ -55,6 +56,7 @@ export enum Accion {
 const ADMINISTRADOR: ReadonlySet<Accion> = new Set([
   Accion.CREAR_USUARIO,
   Accion.ELIMINAR_USUARIO,
+  Accion.ACTIVAR_DESACTIVAR_USUARIO,
   Accion.LISTAR_USUARIOS,
   Accion.VER_USUARIO,
   Accion.CAMBIAR_ROL,
@@ -112,3 +114,4 @@ export const PERMISOS_POR_ROL: Readonly<Record<rol_usuario, ReadonlySet<Accion>>
   profesor: PROFESOR,
   estudiante: ESTUDIANTE,
 };
+

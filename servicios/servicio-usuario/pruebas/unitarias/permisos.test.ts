@@ -10,6 +10,10 @@ describe('PERMISOS_POR_ROL', () => {
       expect(permisos.has(Accion.ELIMINAR_USUARIO)).toBe(true);
     });
 
+    it('deberia poder activar y desactivar usuarios', () => {
+      expect(permisos.has(Accion.ACTIVAR_DESACTIVAR_USUARIO)).toBe(true);
+    });
+
     it('deberia poder cambiar roles', () => {
       expect(permisos.has(Accion.CAMBIAR_ROL)).toBe(true);
     });
@@ -134,3 +138,4 @@ describe('PERMISOS_POR_ROL', () => {
     });
   });
 });
+

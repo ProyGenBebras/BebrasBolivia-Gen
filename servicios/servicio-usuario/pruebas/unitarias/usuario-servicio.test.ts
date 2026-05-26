@@ -115,4 +115,98 @@ describe('UsuarioServicio', () => {
       );
     });
   });
+
+  describe('cambiarEstadoUsuario', () => {
+    const adminMock = {
+      id: 'uuid-admin-123',
+      rol: 'administrador' as const,
+      esta_activo: true,
+    };
+
+    const usuarioObjetivoMock = {
+      id: 'uuid-usuario-456',
+      rol: 'estudiante' as const,
+      esta_activo: true,
+    };
+
+    it('deberia activar un usuario cuando el solicitante es administrador', async () => {
+      // Arrange
+      const buscarPorId = jest
+        .fn()
+        .mockResolvedValueOnce(adminMock)
+        .mockResolvedValueOnce({ ...usuarioObjetivoMock, esta_activo: false });
+      const actualizarEstadoActivo = jest
+        .fn()
+        .mockResolvedValue({ ...usuarioObjetivoMock, esta_activo: true });
+      const servicio = crearUsuarioServicio({
+        repositorio: { buscarPorId, actualizarEstadoActivo } as never,
+        hasheador: { hashear: jest.fn() },
+      });
+
+      // Act
+      const resultado = await servicio.cambiarEstadoUsuario(
+        usuarioObjetivoMock.id,
+        adminMock.id,
+        true,
+      );
+
+      // Assert
+      expect(actualizarEstadoActivo).toHaveBeenCalledWith(usuarioObjetivoMock.id, true);
+      expect(resultado.esta_activo).toBe(true);
+    });
+
+    it('deberia desactivar un usuario cuando el solicitante es administrador', async () => {
+      // Arrange
+      const buscarPorId = jest
+        .fn()
+        .mockResolvedValueOnce(adminMock)
+        .mockResolvedValueOnce(usuarioObjetivoMock);
+      const actualizarEstadoActivo = jest
+        .fn()
+        .mockResolvedValue({ ...usuarioObjetivoMock, esta_activo: false });
+      const servicio = crearUsuarioServicio({
+        repositorio: { buscarPorId, actualizarEstadoActivo } as never,
+        hasheador: { hashear: jest.fn() },
+      });
+
+      // Act
+      const resultado = await servicio.cambiarEstadoUsuario(
+        usuarioObjetivoMock.id,
+        adminMock.id,
+        false,
+      );
+
+      // Assert
+      expect(actualizarEstadoActivo).toHaveBeenCalledWith(usuarioObjetivoMock.id, false);
+      expect(resultado.esta_activo).toBe(false);
+    });
+
+    it('deberia lanzar ErrorNegocio 403 cuando el solicitante no es administrador', async () => {
+      // Arrange
+      const buscarPorId = jest.fn().mockResolvedValue({ ...adminMock, rol: 'profesor' });
+      const servicio = crearUsuarioServicio({
+        repositorio: { buscarPorId } as never,
+        hasheador: { hashear: jest.fn() },
+      });
+
+      // Act & Assert
+      await expect(
+        servicio.cambiarEstadoUsuario(usuarioObjetivoMock.id, adminMock.id, true),
+      ).rejects.toThrow(new ErrorNegocio('No tiene permisos para cambiar el estado del usuario', 403));
+    });
+
+    it('deberia lanzar ErrorNegocio 404 cuando el usuario a modificar no existe', async () => {
+      // Arrange
+      const buscarPorId = jest.fn().mockResolvedValueOnce(adminMock).mockResolvedValueOnce(null);
+      const servicio = crearUsuarioServicio({
+        repositorio: { buscarPorId } as never,
+        hasheador: { hashear: jest.fn() },
+      });
+
+      // Act & Assert
+      await expect(
+        servicio.cambiarEstadoUsuario('uuid-inexistente', adminMock.id, true),
+      ).rejects.toThrow(new ErrorNegocio('Usuario no encontrado', 404));
+    });
+  });
 });
