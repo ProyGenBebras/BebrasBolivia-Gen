@@ -1,6 +1,5 @@
 import type { rol_usuario } from '@prisma/client';
 
-
 export interface DatosExtensionEstudianteDto {
   grupoId?: string;
   codigo?: string;

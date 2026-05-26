@@ -1,10 +1,9 @@
 import type { rol_usuario, usuarios } from '@prisma/client';
 import type { NextFunction, Request, Response } from 'express';
 
+import baseDeDatos from '../config/base-de-datos';
 import type { CambiarRolUsuarioDto } from '../dtos/cambiar-rol-usuario.dto';
 import type { CrearUsuarioDto } from '../dtos/crear-usuario.dto';
-
-import baseDeDatos from '../config/base-de-datos';
 import { RolRepositorio } from '../repositorios/rol-repositorio';
 import { RolServicio } from '../servicios/rol-servicio';
 import { crearUsuarioServicio } from '../servicios/usuario-servicio';
@@ -63,7 +62,7 @@ const validarCambiarRolUsuario = (body: unknown): CambiarRolUsuarioDto => {
       datos['datosAdicionales'] !== undefined &&
         typeof datos['datosAdicionales'] === 'object' &&
         datos['datosAdicionales'] !== null
-        ? (datos['datosAdicionales'] as Record<string, unknown>)
+        ? (datos['datosAdicionales'])
         : undefined,
   };
 };
@@ -94,7 +93,7 @@ export const crearUsuarioControlador = (
       // La identidad del solicitante ahora la garantiza resolverIdentidad antes de esta ruta.
       const idSolicitante = req.usuario!.id;
 
-      await servicio.eliminarUsuario(req.params.id!, idSolicitante);
+      await servicio.eliminarUsuario(req.params.id, idSolicitante);
       res.status(200).json({ mensaje: 'Usuario eliminado correctamente' });
     } catch (error) {
       next(error);
@@ -108,7 +107,7 @@ export const crearUsuarioControlador = (
    */
   async obtenerRolUsuario(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const resultado = await rolServicio.obtenerRolUsuario(req.params.id!);
+      const resultado = await rolServicio.obtenerRolUsuario(req.params.id);
       res.status(200).json({ data: resultado });
     } catch (error) {
       next(error);
@@ -126,7 +125,7 @@ export const crearUsuarioControlador = (
   async modificarRolUsuario(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const dto = validarCambiarRolUsuario(req.body);
-      const resultado = await rolServicio.modificarRolConValidaciones(req.params.id!, dto);
+      const resultado = await rolServicio.modificarRolConValidaciones(req.params.id, dto);
       res.status(200).json({ mensaje: 'Rol actualizado correctamente', data: resultado });
     } catch (error) {
       next(error);

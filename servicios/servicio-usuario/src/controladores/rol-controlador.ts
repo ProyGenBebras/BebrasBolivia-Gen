@@ -1,7 +1,8 @@
 import type { NextFunction, Request, Response } from 'express';
 
 import type { CambiarRolDto } from '../dtos/rol.dto.js';
-import { ErrorNegocio, RolServicio } from '../servicios/rol-servicio.js';
+import { RolServicio } from '../servicios/rol-servicio.js';
+import { ErrorNegocio } from '../utilidades/errores.js';
 
 export class RolControlador {
     constructor(private readonly rolServicio: RolServicio) { }
@@ -66,7 +67,7 @@ export function manejarErrorNegocio(
     next: NextFunction,
 ): void {
     if (error instanceof ErrorNegocio) {
-        res.status(error.status).json({ error: error.message });
+        res.status(error.codigo).json({ error: error.message });
         return;
     }
     next(error);
