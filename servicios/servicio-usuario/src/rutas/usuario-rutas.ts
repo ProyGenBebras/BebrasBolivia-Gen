@@ -1,19 +1,11 @@
 import { Router } from 'express';
 import multer from 'multer';
 
-import { CargaMasivaControlador }
-from '../controladores/carga-masiva.controlador';
-import { usuarioControlador }
-from '../controladores/usuario-controlador';
-import {
-  verificarPermiso,
-  verificarRol,
-}
-from '../middlewares/autorizar';
-import { resolverIdentidad }
-from '../middlewares/resolver-identidad';
-import { Accion }
-from '../shared/permisos';
+import { CargaMasivaControlador } from '../controladores/carga-masiva.controlador';
+import { usuarioControlador } from '../controladores/usuario-controlador';
+import { verificarPermiso, verificarRol } from '../middlewares/autorizar';
+import { resolverIdentidad } from '../middlewares/resolver-identidad';
+import { Accion } from '../shared/permisos';
 
 const usuarioRutas: Router = Router();
 
@@ -21,139 +13,70 @@ const upload = multer({
   storage: multer.memoryStorage(),
 });
 
-const cargaMasivaControlador =
-  new CargaMasivaControlador();
+const cargaMasivaControlador = new CargaMasivaControlador();
 
 /**
  * Rutas del modulo de usuarios.
  *
- * NOTA: la restriccion "solo administrador"
- * depende del middleware de autorizacion.
+ * GET / - Listar usuarios con paginación y filtros (REQ-010)
+ * POST / - Crear usuario manualmente (REQ-004)
+ * DELETE /:id - Eliminar usuario (REQ-002)
+ * GET /:id/rol - Obtener rol del usuario (REQ-008)
+ * PATCH /:id/rol - Modificar rol del usuario (REQ-008)
+ * POST /carga-masiva - Carga masiva de usuarios (REQ-005)
  */
 
-/*
-|--------------------------------------------------------------------------
-| CREAR USUARIO
-|--------------------------------------------------------------------------
-*/
+// GET: Listar usuarios con paginación y filtros (REQ-010) - TU ENDPOINT
+usuarioRutas.get('/', (req, res, next) => {
+  void usuarioControlador.listar(req, res, next);
+});
 
+// POST: Crear usuario manualmente (REQ-004)
 usuarioRutas.post(
   '/',
   resolverIdentidad,
-  verificarPermiso(
-    Accion.CREAR_USUARIO,
-  ),
-
+  verificarPermiso(Accion.CREAR_USUARIO),
   (req, res, next) => {
-
-    void usuarioControlador.crear(
-      req,
-      res,
-      next,
-    );
-
+    void usuarioControlador.crear(req, res, next);
   },
 );
 
-/*
-|--------------------------------------------------------------------------
-| ELIMINAR USUARIO
-|--------------------------------------------------------------------------
-*/
-
+// DELETE: Eliminar usuario (REQ-002)
 usuarioRutas.delete(
   '/:id',
-
   resolverIdentidad,
-
-  verificarRol(
-    'administrador',
-  ),
-
+  verificarRol('administrador'),
   (req, res, next) => {
-
-    void usuarioControlador.eliminar(
-      req,
-      res,
-      next,
-    );
-
+    void usuarioControlador.eliminar(req, res, next);
   },
 );
 
-/*
-|--------------------------------------------------------------------------
-| OBTENER ROL
-|--------------------------------------------------------------------------
-*/
-
+// GET: Obtener rol de usuario (REQ-008)
 usuarioRutas.get(
   '/:id/rol',
-
   resolverIdentidad,
-
-  verificarRol(
-    'administrador',
-  ),
-
+  verificarRol('administrador'),
   (req, res, next) => {
-
-    void usuarioControlador
-      .obtenerRolUsuario(
-        req,
-        res,
-        next,
-      );
-
+    void usuarioControlador.obtenerRolUsuario(req, res, next);
   },
 );
 
-/*
-|--------------------------------------------------------------------------
-| MODIFICAR ROL
-|--------------------------------------------------------------------------
-*/
-
+// PATCH: Modificar rol de usuario (REQ-008)
 usuarioRutas.patch(
   '/:id/rol',
-
   resolverIdentidad,
-
-  verificarRol(
-    'administrador',
-  ),
-
+  verificarRol('administrador'),
   (req, res, next) => {
-
-    void usuarioControlador
-      .modificarRolUsuario(
-        req,
-        res,
-        next,
-      );
-
+    void usuarioControlador.modificarRolUsuario(req, res, next);
   },
 );
 
-/*
-|--------------------------------------------------------------------------
-| CARGA MASIVA
-|--------------------------------------------------------------------------
-*/
-
+// POST: Carga masiva de usuarios (REQ-005)
 usuarioRutas.post(
   '/carga-masiva',
-
   upload.single('file'),
-
   (req, res) => {
-
-    void cargaMasivaControlador
-      .cargar(
-        req,
-        res,
-      );
-
+    void cargaMasivaControlador.cargar(req, res);
   },
 );
 

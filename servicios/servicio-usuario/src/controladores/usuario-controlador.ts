@@ -3,6 +3,7 @@ import type { NextFunction, Request, Response } from 'express';
 
 import baseDeDatos from '../config/base-de-datos';
 import type { CambiarRolUsuarioDto } from '../dtos/cambiar-rol-usuario.dto';
+import type { ConsultaUsuariosQuery } from '../dtos/consulta-usuarios.dto';
 import type { CrearUsuarioDto } from '../dtos/crear-usuario.dto';
 import { RolRepositorio } from '../repositorios/rol-repositorio';
 import { RolServicio } from '../servicios/rol-servicio';
@@ -26,6 +27,7 @@ interface UsuarioPublico {
 
 interface UsuarioControlador {
   crear(req: Request, res: Response, next: NextFunction): Promise<void>;
+  listar(req: Request, res: Response, next: NextFunction): Promise<void>;
   eliminar(req: Request, res: Response, next: NextFunction): Promise<void>;
   obtenerRolUsuario(req: Request, res: Response, next: NextFunction): Promise<void>;
   modificarRolUsuario(req: Request, res: Response, next: NextFunction): Promise<void>;
@@ -86,13 +88,39 @@ export const crearUsuarioControlador = (
     }
   },
 
+  /**
+   * GET /api/v1/usuarios
+   * Lista usuarios con paginación y filtros (REQ-010)
+   */
+  async listar(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const query: ConsultaUsuariosQuery = {
+        page: req.query.page ? parseInt(req.query.page as string) : 1,
+        limit: req.query.limit ? parseInt(req.query.limit as string) : 10,
+        rol: req.query.rol as string,
+        estaActivo: req.query.estaActivo === 'true' ? true : req.query.estaActivo === 'false' ? false : undefined,
+        search: req.query.search as string,
+        orderBy: req.query.orderBy as string,
+        orderDir: req.query.orderDir as 'asc' | 'desc',
+      };
+      
+      const resultado = await servicio.listar(query);
+      res.status(200).json({ 
+        data: resultado.usuarios.map(aRespuestaPublica),
+        paginacion: resultado.paginacion 
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  /**
+   * DELETE /api/v1/usuarios/:id
+   * Elimina logicamente un usuario (REQ-002)
+   */
   async eliminar(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      // MODIFICADO (middleware de autorizacion):
-      // Se reemplazo la lectura manual del header 'x-usuario-id' por req.usuario.id.
-      // La identidad del solicitante ahora la garantiza resolverIdentidad antes de esta ruta.
       const idSolicitante = req.usuario!.id;
-
       await servicio.eliminarUsuario(req.params.id, idSolicitante);
       res.status(200).json({ mensaje: 'Usuario eliminado correctamente' });
     } catch (error) {
