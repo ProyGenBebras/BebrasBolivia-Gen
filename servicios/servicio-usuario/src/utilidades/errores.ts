@@ -13,3 +13,26 @@ export class ErrorNegocio extends Error {
     this.codigo = codigo;
   }
 }
+
+/**
+ * El solicitante no tiene identidad reconocida en el sistema.
+ * Se lanza cuando falta el token/header de autenticacion o el usuario
+ * no existe en BD. Siempre produce HTTP 401.
+ */
+export class ErrorNoAutenticado extends ErrorNegocio {
+  constructor(mensaje = 'No autenticado') {
+    super(mensaje, 401);
+    this.name = 'ErrorNoAutenticado';
+  }
+}
+
+/**
+ * El solicitante esta autenticado pero no tiene permisos para esta operacion.
+ * Se lanza cuando el rol o el scope no cubren la accion solicitada. Siempre produce HTTP 403.
+ */
+export class ErrorProhibido extends ErrorNegocio {
+  constructor(mensaje = 'Acceso prohibido') {
+    super(mensaje, 403);
+    this.name = 'ErrorProhibido';
+  }
+}

@@ -1,4 +1,5 @@
 import type { usuarios } from '@prisma/client';
+import bcrypt from 'bcrypt';
 
 import type { ConsultaUsuariosQuery, PaginacionResponse } from '../dtos/consulta-usuarios.dto';
 import type { CrearUsuarioDto } from '../dtos/crear-usuario.dto';
@@ -12,28 +13,19 @@ type UsuarioRepositorio = ReturnType<typeof crearUsuarioRepositorio>;
 
 /**
  * Puerto de hasheo de contrasenas.
- *
- * PENDIENTE (Angel - Tarea 4 "Encriptar contrasena"): reemplazar el
- * hasheador por defecto por una implementacion real (bcrypt o equivalente,
- * segun RNF-01) una vez que el equipo apruebe agregar la dependencia.
- * No cambiar esta interfaz: el servicio ya esta desacoplado de la libreria.
  */
 export interface HasheadorContrasena {
   hashear(contrasenaPlana: string): Promise<string>;
 }
 
 /**
- * Stub temporal. NO es seguro para produccion: no hashea realmente.
- * Existe solo para que el flujo compile y se pueda probar la capa de
- * servicio mientras Angel integra el hasheo real. Lanza en runtime si se
- * usa sin reemplazar, para evitar guardar contrasenas en texto plano.
+ * Implementacion hasheo usando bcrypt (REQ-04).
  */
-const hasheadorPendiente: HasheadorContrasena = {
-  hashear(): Promise<string> {
-    return Promise.reject(
-      new ErrorNegocio('Hasheo de contrasena no implementado (pendiente Tarea 4 - Angel)', 501),
-    );
-  },
+const hasheadorBcrypt: HasheadorContrasena = {
+  async hashear(contrasenaPlana: string): Promise<string> {
+    const rondasSal = 10;
+    return bcrypt.hash(contrasenaPlana, rondasSal);
+  }
 };
 
 interface DependenciasUsuarioServicio {
@@ -47,13 +39,15 @@ interface UsuarioServicio {
     usuarios: usuarios[];
     paginacion: PaginacionResponse;
   }>;
+  eliminarUsuario(idUsuario: string, idSolicitante: string): Promise<usuarios>;
+  cambiarEstadoUsuario(idUsuario: string, idSolicitante: string, estaActivo: boolean): Promise<usuarios>;
 }
 
 export const crearUsuarioServicio = (
   dependencias: DependenciasUsuarioServicio = {},
 ): UsuarioServicio => {
   const repositorio = dependencias.repositorio ?? repositorioPorDefecto;
-  const hasheador = dependencias.hasheador ?? hasheadorPendiente;
+  const hasheador = dependencias.hasheador ?? hasheadorBcrypt;
 
   return {
     /**
@@ -98,6 +92,53 @@ export const crearUsuarioServicio = (
           totalPages: Math.ceil(total / limit),
         },
       };
+    },
+
+    /**
+     * Elimina logicamente un usuario (REQ-002)
+     */
+    async eliminarUsuario(idUsuario: string, idSolicitante: string): Promise<usuarios> {
+      const solicitante = await repositorio.buscarPorId(idSolicitante);
+
+      if (!solicitante || solicitante.rol !== 'administrador') {
+        throw new ErrorNegocio('No tiene permisos para eliminar usuarios', 403);
+      }
+
+      const usuario = await repositorio.buscarPorId(idUsuario);
+
+      if (!usuario) {
+        throw new ErrorNegocio('Usuario no encontrado', 404);
+      }
+
+      if (!usuario.esta_activo) {
+        throw new ErrorNegocio('El usuario ya fue eliminado', 400);
+      }
+
+      return repositorio.eliminar(idUsuario);
+    },
+
+    /**
+     * Activa o desactiva un usuario (REQ-006)
+     * Solo un administrador puede realizar esta accion.
+     */
+    async cambiarEstadoUsuario(
+      idUsuario: string,
+      idSolicitante: string,
+      estaActivo: boolean,
+    ): Promise<usuarios> {
+      const solicitante = await repositorio.buscarPorId(idSolicitante);
+
+      if (!solicitante || solicitante.rol !== 'administrador') {
+        throw new ErrorNegocio('No tiene permisos para cambiar el estado del usuario', 403);
+      }
+
+      const usuario = await repositorio.buscarPorId(idUsuario);
+
+      if (!usuario) {
+        throw new ErrorNegocio('Usuario no encontrado', 404);
+      }
+
+      return repositorio.actualizarEstadoActivo(idUsuario, estaActivo);
     },
   };
 };

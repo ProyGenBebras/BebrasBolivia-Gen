@@ -18,6 +18,8 @@ type UsuarioRepositorio = {
     usuarios: usuarios[];
     total: number;
   }>;
+  eliminar(id: string): Promise<usuarios>;
+  actualizarEstadoActivo(id: string, estaActivo: boolean): Promise<usuarios>;
 };
 
 export const crearUsuarioRepositorio = (conexionBD: ConexionBD): UsuarioRepositorio => ({
@@ -50,7 +52,7 @@ export const crearUsuarioRepositorio = (conexionBD: ConexionBD): UsuarioReposito
     const where: Prisma.usuariosWhereInput = {};
     
     if (rol) {
-      where.rol = rol as rol_usuario;  // ✅ CORREGIDO
+      where.rol = rol as rol_usuario;
     }
     
     if (estaActivo !== undefined) {
@@ -78,6 +80,20 @@ export const crearUsuarioRepositorio = (conexionBD: ConexionBD): UsuarioReposito
     ]);
     
     return { usuarios, total };
+  },
+
+  async eliminar(id: string): Promise<usuarios> {
+    return conexionBD.usuarios.update({
+      where: { id },
+      data: { esta_activo: false },
+    });
+  },
+
+  async actualizarEstadoActivo(id: string, estaActivo: boolean): Promise<usuarios> {
+    return conexionBD.usuarios.update({
+      where: { id },
+      data: { esta_activo: estaActivo, actualizado_en: new Date() },
+    });
   },
 });
 
