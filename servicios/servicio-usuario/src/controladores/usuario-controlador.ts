@@ -6,10 +6,12 @@ import type { CambiarRolUsuarioDto } from '../dtos/cambiar-rol-usuario.dto';
 import type { CrearUsuarioDto } from '../dtos/crear-usuario.dto';
 import { RolRepositorio } from '../repositorios/rol-repositorio';
 import { RolServicio } from '../servicios/rol-servicio';
-import { crearUsuarioServicio } from '../servicios/usuario-servicio';
+import { crearPerfilServicio, crearUsuarioServicio } from '../servicios/usuario-servicio';
+import { validarActualizarPerfil } from '../utilidades/validar-actualizar-perfil';
 import { validarCrearUsuario } from '../utilidades/validar-crear-usuario';
 
 type UsuarioServicio = ReturnType<typeof crearUsuarioServicio>;
+type PerfilServicio = ReturnType<typeof crearPerfilServicio>;
 
 interface UsuarioPublico {
   id: string;
@@ -22,11 +24,14 @@ interface UsuarioPublico {
   estaActivo: boolean;
   estaVerificado: boolean;
   creadoEn: Date;
+  actualizadoEn: Date;
 }
 
 interface UsuarioControlador {
   crear(req: Request, res: Response, next: NextFunction): Promise<void>;
   eliminar(req: Request, res: Response, next: NextFunction): Promise<void>;
+  obtener(req: Request, res: Response, next: NextFunction): Promise<void>;
+  actualizar(req: Request, res: Response, next: NextFunction): Promise<void>;
   obtenerRolUsuario(req: Request, res: Response, next: NextFunction): Promise<void>;
   modificarRolUsuario(req: Request, res: Response, next: NextFunction): Promise<void>;
 }
@@ -43,6 +48,7 @@ const aRespuestaPublica = (usuario: usuarios): UsuarioPublico => ({
   estaActivo: usuario.esta_activo,
   estaVerificado: usuario.esta_verificado,
   creadoEn: usuario.creado_en,
+  actualizadoEn: usuario.actualizado_en,
 });
 
 /**
@@ -70,6 +76,7 @@ const validarCambiarRolUsuario = (body: unknown): CambiarRolUsuarioDto => {
 export const crearUsuarioControlador = (
   servicio: UsuarioServicio = crearUsuarioServicio(),
   rolServicio: RolServicio = new RolServicio(new RolRepositorio(baseDeDatos)),
+  perfilServicio: PerfilServicio = crearPerfilServicio(),
 ): UsuarioControlador => ({
   /**
    * POST /api/v1/usuarios
@@ -100,6 +107,15 @@ export const crearUsuarioControlador = (
     }
   },
 
+  async obtener(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const usuario = await perfilServicio.obtener(req.params.id);
+      res.status(200).json({ data: aRespuestaPublica(usuario) });
+    } catch (error) {
+      next(error);
+    }
+  },
+
   /**
    * GET /api/v1/usuarios/:id/rol
    * Retorna el rol actual del usuario identificado por :id (REQ-08 Task 1).
@@ -109,6 +125,23 @@ export const crearUsuarioControlador = (
     try {
       const resultado = await rolServicio.obtenerRolUsuario(req.params.id);
       res.status(200).json({ data: resultado });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async actualizar(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const idSolicitante = req.headers['x-usuario-id'];
+
+      if (!idSolicitante || typeof idSolicitante !== 'string') {
+        res.status(400).json({ mensaje: 'Falta el identificador del solicitante' });
+        return;
+      }
+
+      const dto = validarActualizarPerfil(req.body);
+      const actualizado = await perfilServicio.actualizar(req.params.id, dto, idSolicitante);
+      res.status(200).json({ data: aRespuestaPublica(actualizado) });
     } catch (error) {
       next(error);
     }

@@ -8,11 +8,16 @@ type ConexionBD = Pick<PrismaClient, 'usuarios'>;
 // desde la capa de servicios; el repositorio solo persiste, no transforma datos.
 export type DatosCrearUsuario = Prisma.usuariosCreateInput;
 
+export type DatosActualizarUsuario =
+  Pick<Partial<Prisma.usuariosUpdateInput>, 'nombres' | 'apellidos' | 'correo' | 'telefono'>;
+
 // Ejemplo base: agregar nuevos metodos segun necesidades de cada modulo.
 type UsuarioRepositorio = {
   buscarPorId(id: string): Promise<usuarios | null>;
   buscarPorCorreo(correo: string): Promise<usuarios | null>;
   crear(datos: DatosCrearUsuario): Promise<usuarios>;
+  buscarPorCorreoExcluyendo(correo: string, idExcluir: string): Promise<usuarios | null>;
+  actualizarPerfil(id: string, datos: DatosActualizarUsuario): Promise<usuarios>;
   eliminar(id: string): Promise<usuarios>;
   actualizarEstadoActivo(id: string, estaActivo: boolean): Promise<usuarios>;
 };
@@ -28,6 +33,25 @@ export const crearUsuarioRepositorio = (conexionBD: ConexionBD): UsuarioReposito
 
   async crear(datos: DatosCrearUsuario): Promise<usuarios> {
     return conexionBD.usuarios.create({ data: datos });
+  },
+
+  async buscarPorCorreoExcluyendo(correo: string, idExcluir: string): Promise<usuarios | null> {
+    return conexionBD.usuarios.findFirst({
+      where: {
+        correo,
+        id: { not: idExcluir },
+      },
+    });
+  },
+
+  async actualizarPerfil(id: string, datos: DatosActualizarUsuario): Promise<usuarios> {
+    return conexionBD.usuarios.update({
+      where: { id },
+      data: {
+        ...datos,
+        actualizado_en: new Date(),
+      },
+    });
   },
 
   async eliminar(id: string): Promise<usuarios> {

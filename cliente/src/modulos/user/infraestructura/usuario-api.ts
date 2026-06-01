@@ -1,4 +1,8 @@
-import type { CrearUsuarioPayload, EditarPerfilPayload, DatosPerfilUsuario } from '../dominio/usuario';
+import type {
+  CrearUsuarioPayload,
+  EditarPerfilPayload,
+  DatosPerfilUsuario,
+} from '../dominio/usuario';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4102';
 

@@ -17,7 +17,6 @@ interface EditProfileFormProps {
   onCancelar?: () => void;
 }
 
-
 export function EditProfileForm({
   datosIniciales,
   usuarioId,

@@ -157,4 +157,52 @@ usuarioRutas.post(
   },
 );
 
+/*
+|--------------------------------------------------------------------------
+| OBTENER USUARIO
+|--------------------------------------------------------------------------
+*/
+
+usuarioRutas.get(
+  '/:id',
+
+  resolverIdentidad,
+
+  verificarRol(
+    'administrador',
+  ),
+
+  (req, res, next) => {
+    void usuarioControlador.obtener(
+      req,
+      res,
+      next,
+    );
+  },
+);
+
+/*
+|--------------------------------------------------------------------------
+| ACTUALIZAR PERFIL DE USUARIO
+|--------------------------------------------------------------------------
+*/
+
+usuarioRutas.patch(
+  '/:id',
+
+  resolverIdentidad,
+
+  verificarRol(
+    'administrador',
+  ),
+
+  (req, res, next) => {
+    void usuarioControlador.actualizar(
+      req,
+      res,
+      next,
+    );
+  },
+);
+
 export default usuarioRutas;
