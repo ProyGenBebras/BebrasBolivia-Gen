@@ -1,5 +1,6 @@
 import type { usuarios } from '@prisma/client';
 import bcrypt from 'bcrypt';
+import type { ActualizarUsuarioDto } from 'src/dtos/actualizar-usuario.dto';
 
 import type { ConsultaUsuariosQuery, PaginacionResponse } from '../dtos/consulta-usuarios.dto';
 import type { CrearUsuarioDto } from '../dtos/crear-usuario.dto';
@@ -11,6 +12,14 @@ import { ErrorNegocio } from '../utilidades/errores';
 
 type UsuarioRepositorio = ReturnType<typeof crearUsuarioRepositorio>;
 
+interface DependenciasPerfilServicio {
+  repositorio?: UsuarioRepositorio;
+}
+
+interface PerfilServicio {
+  obtener(id: string): Promise<usuarios>;
+  actualizar(id: string, dto: ActualizarUsuarioDto, idSolicitante: string): Promise<usuarios>;
+}
 /**
  * Puerto de hasheo de contrasenas.
  */
@@ -139,6 +148,46 @@ export const crearUsuarioServicio = (
       }
 
       return repositorio.actualizarEstadoActivo(idUsuario, estaActivo);
+    },
+  };
+};
+
+export const crearPerfilServicio = (
+  dependencias: DependenciasPerfilServicio = {},
+): PerfilServicio => {
+  const repositorio = dependencias.repositorio ?? repositorioPorDefecto;
+
+  return {
+    async obtener(id: string): Promise<usuarios> {
+      const usuario = await repositorio.buscarPorId(id);
+      if (usuario === null) {
+        throw new ErrorNegocio('Usuario no encontrado', 404);
+      }
+      return usuario;
+    },
+
+    async actualizar(id: string, dto: ActualizarUsuarioDto, idSolicitante: string): Promise<usuarios> {
+      const solicitante = await repositorio.buscarPorId(idSolicitante);
+      if (!solicitante || solicitante.rol !== 'administrador') {
+        throw new ErrorNegocio('No tiene permisos para actualizar usuarios', 403);
+      }
+
+      const usuario = await repositorio.buscarPorId(id);
+      if (usuario === null) {
+        throw new ErrorNegocio('Usuario no encontrado', 404);
+      }
+
+      const correoEnUso = await repositorio.buscarPorCorreoExcluyendo(dto.correo, id);
+      if (correoEnUso !== null) {
+        throw new ErrorNegocio('El correo ya esta registrado por otro usuario', 409);
+      }
+
+      return repositorio.actualizarPerfil(id, {
+        nombres: dto.nombres,
+        apellidos: dto.apellidos,
+        correo: dto.correo,
+        telefono: dto.telefono ?? null,
+      });
     },
   };
 };

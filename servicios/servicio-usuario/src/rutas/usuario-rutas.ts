@@ -80,4 +80,42 @@ usuarioRutas.post(
   },
 );
 
+// GET: Mostrar usuarios (extra)
+usuarioRutas.get(
+  '/:id',
+
+  resolverIdentidad,
+
+  verificarRol(
+    'administrador',
+  ),
+
+  (req, res, next) => {
+    void usuarioControlador.obtener(
+      req,
+      res,
+      next,
+    );
+  },
+);
+
+// PATCH: Modificar datos de un usuario(REQ-001-Editar Perfil de Usuario)
+usuarioRutas.patch(
+  '/:id',
+
+  resolverIdentidad,
+
+  verificarRol(
+    'administrador',
+  ),
+
+  (req, res, next) => {
+    void usuarioControlador.actualizar(
+      req,
+      res,
+      next,
+    );
+  },
+);
+
 export default usuarioRutas;

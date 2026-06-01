@@ -1,6 +1,9 @@
 import type { CrearUsuarioDto } from '../../src/dtos/crear-usuario.dto';
-import { crearUsuarioServicio } from '../../src/servicios/usuario-servicio';
+import type { ActualizarUsuarioDto } from '../../src/dtos/actualizar-usuario.dto'
+import { crearUsuarioServicio, crearPerfilServicio } from '../../src/servicios/usuario-servicio';
 import { ErrorNegocio } from '../../src/utilidades/errores';
+
+
 
 
 const dto: CrearUsuarioDto = {
@@ -154,6 +157,164 @@ describe('UsuarioServicio', () => {
       await expect(servicio.eliminarUsuario(usuarioObjetivoMock.id, adminMock.id)).rejects.toThrow(
         new ErrorNegocio('El usuario ya fue eliminado', 400),
       );
+    });
+  });
+});
+
+// ─── Tests para PerfilServicio (obtener + actualizar / PATCH) ───────────
+
+describe('PerfilServicio', () => {
+  const adminMock = {
+    id: 'uuid-admin-123',
+    rol: 'administrador' as const,
+    esta_activo: true,
+    correo: 'admin@bebras.com',
+    nombres: 'Admin',
+    apellidos: 'Principal',
+  };
+
+  const usuarioMock = {
+    id: 'uuid-usuario-456',
+    correo: 'usuario@bebras.com',
+    nombres: 'Juan',
+    apellidos: 'Perez',
+    rol: 'estudiante' as const,
+    telefono: null,
+    esta_activo: true,
+  };
+
+  describe('obtener', () => {
+    it('deberia retornar el usuario cuando existe', async () => {
+      const buscarPorId = jest.fn().mockResolvedValue(usuarioMock);
+      const servicio = crearPerfilServicio({
+        repositorio: { buscarPorId } as never,
+      });
+
+      const resultado = await servicio.obtener(usuarioMock.id);
+
+      expect(buscarPorId).toHaveBeenCalledWith(usuarioMock.id);
+      expect(resultado).toEqual(usuarioMock);
+    });
+
+    it('deberia lanzar ErrorNegocio 404 cuando el usuario no existe', async () => {
+      const buscarPorId = jest.fn().mockResolvedValue(null);
+      const servicio = crearPerfilServicio({
+        repositorio: { buscarPorId } as never,
+      });
+
+      await expect(servicio.obtener('uuid-inexistente')).rejects.toThrow(
+        new ErrorNegocio('Usuario no encontrado', 404),
+      );
+    });
+  });
+
+  describe('actualizar', () => {
+    const dtoActualizar: ActualizarUsuarioDto = {
+      nombres: 'Juan Carlos',
+      apellidos: 'Perez Lopez',
+      correo: 'juancarlos@bebras.com',
+      telefono: '70000001',
+    };
+
+    it('deberia actualizar cuando el solicitante es administrador y el correo es unico', async () => {
+      const usuarioActualizado = { ...usuarioMock, ...dtoActualizar };
+      const buscarPorId = jest
+        .fn()
+        .mockResolvedValueOnce(adminMock)       // solicitante
+        .mockResolvedValueOnce(usuarioMock);     // usuario objetivo
+      const buscarPorCorreoExcluyendo = jest.fn().mockResolvedValue(null);
+      const actualizarPerfil = jest.fn().mockResolvedValue(usuarioActualizado);
+      const servicio = crearPerfilServicio({
+        repositorio: { buscarPorId, buscarPorCorreoExcluyendo, actualizarPerfil } as never,
+      });
+
+      const resultado = await servicio.actualizar(usuarioMock.id, dtoActualizar, adminMock.id);
+
+      expect(buscarPorId).toHaveBeenCalledWith(adminMock.id);
+      expect(buscarPorId).toHaveBeenCalledWith(usuarioMock.id);
+      expect(buscarPorCorreoExcluyendo).toHaveBeenCalledWith(dtoActualizar.correo, usuarioMock.id);
+      expect(actualizarPerfil).toHaveBeenCalledWith(usuarioMock.id, {
+        nombres: dtoActualizar.nombres,
+        apellidos: dtoActualizar.apellidos,
+        correo: dtoActualizar.correo,
+        telefono: dtoActualizar.telefono,
+      });
+      expect(resultado).toEqual(usuarioActualizado);
+    });
+
+    it('deberia actualizar con telefono null cuando no se envia', async () => {
+      const dtoSinTelefono: ActualizarUsuarioDto = {
+        nombres: 'Ana',
+        apellidos: 'Garcia',
+        correo: 'ana@bebras.com',
+      };
+      const buscarPorId = jest
+        .fn()
+        .mockResolvedValueOnce(adminMock)
+        .mockResolvedValueOnce(usuarioMock);
+      const buscarPorCorreoExcluyendo = jest.fn().mockResolvedValue(null);
+      const actualizarPerfil = jest.fn().mockResolvedValue({ ...usuarioMock, ...dtoSinTelefono });
+      const servicio = crearPerfilServicio({
+        repositorio: { buscarPorId, buscarPorCorreoExcluyendo, actualizarPerfil } as never,
+      });
+
+      await servicio.actualizar(usuarioMock.id, dtoSinTelefono, adminMock.id);
+
+      expect(actualizarPerfil).toHaveBeenCalledWith(usuarioMock.id, expect.objectContaining({
+        telefono: null,
+      }));
+    });
+
+    it('deberia lanzar ErrorNegocio 403 cuando el solicitante no es administrador', async () => {
+      const noAdmin = { ...adminMock, rol: 'profesor' as const };
+      const buscarPorId = jest.fn().mockResolvedValue(noAdmin);
+      const servicio = crearPerfilServicio({
+        repositorio: { buscarPorId } as never,
+      });
+
+      await expect(
+        servicio.actualizar(usuarioMock.id, dtoActualizar, noAdmin.id),
+      ).rejects.toThrow(new ErrorNegocio('No tiene permisos para actualizar usuarios', 403));
+    });
+
+    it('deberia lanzar ErrorNegocio 403 cuando el solicitante no existe', async () => {
+      const buscarPorId = jest.fn().mockResolvedValue(null);
+      const servicio = crearPerfilServicio({
+        repositorio: { buscarPorId } as never,
+      });
+
+      await expect(
+        servicio.actualizar(usuarioMock.id, dtoActualizar, 'uuid-fantasma'),
+      ).rejects.toThrow(new ErrorNegocio('No tiene permisos para actualizar usuarios', 403));
+    });
+
+    it('deberia lanzar ErrorNegocio 404 cuando el usuario a actualizar no existe', async () => {
+      const buscarPorId = jest
+        .fn()
+        .mockResolvedValueOnce(adminMock)
+        .mockResolvedValueOnce(null);
+      const servicio = crearPerfilServicio({
+        repositorio: { buscarPorId } as never,
+      });
+
+      await expect(
+        servicio.actualizar('uuid-inexistente', dtoActualizar, adminMock.id),
+      ).rejects.toThrow(new ErrorNegocio('Usuario no encontrado', 404));
+    });
+
+    it('deberia lanzar ErrorNegocio 409 cuando el correo ya esta registrado por otro usuario', async () => {
+      const buscarPorId = jest
+        .fn()
+        .mockResolvedValueOnce(adminMock)
+        .mockResolvedValueOnce(usuarioMock);
+      const buscarPorCorreoExcluyendo = jest.fn().mockResolvedValue({ id: 'otro-usuario' });
+      const servicio = crearPerfilServicio({
+        repositorio: { buscarPorId, buscarPorCorreoExcluyendo } as never,
+      });
+
+      await expect(
+        servicio.actualizar(usuarioMock.id, dtoActualizar, adminMock.id),
+      ).rejects.toThrow(new ErrorNegocio('El correo ya esta registrado por otro usuario', 409));
     });
   });
 });
