@@ -8,8 +8,7 @@ type ConexionBD = Pick<PrismaClient, 'usuarios'>;
 // Datos para persistir un usuario nuevo. La contrasena debe llegar ya hasheada
 // desde la capa de servicios; el repositorio solo persiste, no transforma datos.
 export type DatosCrearUsuario = Prisma.usuariosCreateInput;
-
-export type DatosActualizarUsuario =
+export type DatosActualizarUsuario=
   Pick<Partial<Prisma.usuariosUpdateInput>, 'nombres' | 'apellidos' | 'correo' | 'telefono'>;
 
 // Ejemplo base: agregar nuevos metodos segun necesidades de cada modulo.

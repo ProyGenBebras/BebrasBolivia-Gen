@@ -38,8 +38,7 @@ describe('UsuarioRepositorio', () => {
     expect(resultado).toEqual({ id: 'u9', ...datos });
   });
 
-
- // ─── Tests para buscarPorCorreoExcluyendo ────────────────────────────
+  // ─── Tests para buscarPorCorreoExcluyendo ────────────────────────────
 
   it('deberia buscar por correo excluyendo un id especifico', async () => {
     const findFirst = jest.fn().mockResolvedValue(null);

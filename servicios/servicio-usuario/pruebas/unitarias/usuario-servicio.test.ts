@@ -1,9 +1,7 @@
+import type { CrearUsuarioDto } from '../../src/dtos/crear-usuario.dto';
+import type { ActualizarUsuarioDto } from '../../src/dtos/actualizar-usuario.dto'
 import { crearUsuarioServicio, crearPerfilServicio } from '../../src/servicios/usuario-servicio';
 import { ErrorNegocio } from '../../src/utilidades/errores';
-
-import type { CrearUsuarioDto } from '../../src/dtos/crear-usuario.dto';
-import type { ActualizarUsuarioDto } from '../../src/dtos/actualizar-usuario.dto';
-
 
 const dto: CrearUsuarioDto = {
   correo: 'nuevo@bebras.com',

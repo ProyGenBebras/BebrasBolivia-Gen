@@ -3,16 +3,16 @@ import type { NextFunction, Request, Response } from 'express';
 
 import baseDeDatos from '../config/base-de-datos';
 import type { CambiarRolUsuarioDto } from '../dtos/cambiar-rol-usuario.dto';
-import type { ConsultaUsuariosQuery } from '../dtos/consulta-usuarios.dto';
 import type { CrearUsuarioDto } from '../dtos/crear-usuario.dto';
 import { RolRepositorio } from '../repositorios/rol-repositorio';
 import { RolServicio } from '../servicios/rol-servicio';
 import { crearPerfilServicio, crearUsuarioServicio } from '../servicios/usuario-servicio';
 import { validarActualizarPerfil } from '../utilidades/validar-actualizar-perfil';
+import { validarConsultaUsuarios } from '../utilidades/validar-consulta-usuarios';
 import { validarCrearUsuario } from '../utilidades/validar-crear-usuario';
 
 type UsuarioServicio = ReturnType<typeof crearUsuarioServicio>;
-type PerfilServicio = ReturnType<typeof crearPerfilServicio>;
+type PerfilServicio = ReturnType<typeof crearPerfilServicio>
 
 interface UsuarioPublico {
   id: string;
@@ -101,15 +101,7 @@ export const crearUsuarioControlador = (
    */
   async listar(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const query: ConsultaUsuariosQuery = {
-        page: req.query.page ? parseInt(req.query.page as string) : 1,
-        limit: req.query.limit ? parseInt(req.query.limit as string) : 10,
-        rol: req.query.rol as string,
-        estaActivo: req.query.estaActivo === 'true' ? true : req.query.estaActivo === 'false' ? false : undefined,
-        search: req.query.search as string,
-        orderBy: req.query.orderBy as string,
-        orderDir: req.query.orderDir as 'asc' | 'desc',
-      };
+      const query = validarConsultaUsuarios(req.query);
       
       const resultado = await servicio.listar(query);
       res.status(200).json({ 
@@ -144,20 +136,6 @@ export const crearUsuarioControlador = (
     }
   },
 
-  /**
-   * GET /api/v1/usuarios/:id/rol
-   * Retorna el rol actual del usuario identificado por :id (REQ-08 Task 1).
-   * Solo accesible por administradores.
-   */
-  async obtenerRolUsuario(req: Request, res: Response, next: NextFunction): Promise<void> {
-    try {
-      const resultado = await rolServicio.obtenerRolUsuario(req.params.id);
-      res.status(200).json({ data: resultado });
-    } catch (error) {
-      next(error);
-    }
-  },
-
   async actualizar(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const idSolicitante = req.headers['x-usuario-id'];
@@ -170,6 +148,20 @@ export const crearUsuarioControlador = (
       const dto = validarActualizarPerfil(req.body);
       const actualizado = await perfilServicio.actualizar(req.params.id, dto, idSolicitante);
       res.status(200).json({ data: aRespuestaPublica(actualizado) });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  /**
+   * GET /api/v1/usuarios/:id/rol
+   * Retorna el rol actual del usuario identificado por :id (REQ-08 Task 1).
+   * Solo accesible por administradores.
+   */
+  async obtenerRolUsuario(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const resultado = await rolServicio.obtenerRolUsuario(req.params.id);
+      res.status(200).json({ data: resultado });
     } catch (error) {
       next(error);
     }

@@ -24,6 +24,8 @@ const cargaMasivaControlador = new CargaMasivaControlador();
  * GET /:id/rol - Obtener rol del usuario (REQ-008)
  * PATCH /:id/rol - Modificar rol del usuario (REQ-008)
  * POST /carga-masiva - Carga masiva de usuarios (REQ-005)
+ * GET /:id - Obtener Usuario(REQ-001-extra)
+ * PATCH /:id - Modificar Usuario(REQ-001)
  */
 
 // GET: Listar usuarios con paginación y filtros (REQ-010) - TU ENDPOINT
@@ -80,12 +82,7 @@ usuarioRutas.post(
   },
 );
 
-/*
-|--------------------------------------------------------------------------
-| OBTENER USUARIO
-|--------------------------------------------------------------------------
-*/
-
+// GET: Mostrar usuarios (extra)
 usuarioRutas.get(
   '/:id',
 
@@ -104,12 +101,7 @@ usuarioRutas.get(
   },
 );
 
-/*
-|--------------------------------------------------------------------------
-| ACTUALIZAR PERFIL DE USUARIO
-|--------------------------------------------------------------------------
-*/
-
+// PATCH: Modificar datos de un usuario(REQ-001-Editar Perfil de Usuario)
 usuarioRutas.patch(
   '/:id',
 
