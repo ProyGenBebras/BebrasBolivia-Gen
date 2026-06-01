@@ -2,6 +2,7 @@ import type { usuarios } from '@prisma/client';
 import bcrypt from 'bcrypt';
 
 import type { ActualizarUsuarioDto } from '../dtos/actualizar-usuario.dto';
+import type { ConsultaUsuariosQuery, PaginacionResponse } from '../dtos/consulta-usuarios.dto';
 import type { CrearUsuarioDto } from '../dtos/crear-usuario.dto';
 import {
   crearUsuarioRepositorio,
@@ -43,6 +44,10 @@ interface DependenciasUsuarioServicio {
 
 interface UsuarioServicio {
   crear(dto: CrearUsuarioDto): Promise<usuarios>;
+  listar(query: ConsultaUsuariosQuery): Promise<{
+    usuarios: usuarios[];
+    paginacion: PaginacionResponse;
+  }>;
   eliminarUsuario(idUsuario: string, idSolicitante: string): Promise<usuarios>;
   cambiarEstadoUsuario(idUsuario: string, idSolicitante: string, estaActivo: boolean): Promise<usuarios>;
 }
@@ -77,6 +82,30 @@ export const crearUsuarioServicio = (
       });
     },
 
+    /**
+     * Lista usuarios con paginación y filtros (REQ-010)
+     */
+    async listar(query: ConsultaUsuariosQuery): Promise<{
+      usuarios: usuarios[];
+      paginacion: PaginacionResponse;
+    }> {
+      const { page = 1, limit = 10 } = query;
+      const { usuarios, total } = await repositorio.listar(query);
+      
+      return {
+        usuarios,
+        paginacion: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        },
+      };
+    },
+
+    /**
+     * Elimina logicamente un usuario (REQ-002)
+     */
     async eliminarUsuario(idUsuario: string, idSolicitante: string): Promise<usuarios> {
       const solicitante = await repositorio.buscarPorId(idSolicitante);
 
@@ -98,7 +127,7 @@ export const crearUsuarioServicio = (
     },
 
     /**
-     * Activa o desactiva un usuario.
+     * Activa o desactiva un usuario (REQ-006)
      * Solo un administrador puede realizar esta accion.
      */
     async cambiarEstadoUsuario(

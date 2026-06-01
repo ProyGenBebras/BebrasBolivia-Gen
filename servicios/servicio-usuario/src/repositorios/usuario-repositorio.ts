@@ -1,6 +1,7 @@
-import type { Prisma, PrismaClient, usuarios } from '@prisma/client';
+import type { Prisma, PrismaClient, usuarios, rol_usuario } from '@prisma/client';
 
 import baseDeDatos from '../config/base-de-datos';
+import type { ConsultaUsuariosQuery } from '../dtos/consulta-usuarios.dto';
 
 type ConexionBD = Pick<PrismaClient, 'usuarios'>;
 
@@ -18,6 +19,10 @@ type UsuarioRepositorio = {
   crear(datos: DatosCrearUsuario): Promise<usuarios>;
   buscarPorCorreoExcluyendo(correo: string, idExcluir: string): Promise<usuarios | null>;
   actualizarPerfil(id: string, datos: DatosActualizarUsuario): Promise<usuarios>;
+  listar(params: ConsultaUsuariosQuery): Promise<{
+    usuarios: usuarios[];
+    total: number;
+  }>;
   eliminar(id: string): Promise<usuarios>;
   actualizarEstadoActivo(id: string, estaActivo: boolean): Promise<usuarios>;
 };
@@ -52,6 +57,52 @@ export const crearUsuarioRepositorio = (conexionBD: ConexionBD): UsuarioReposito
         actualizado_en: new Date(),
       },
     });
+  },
+  async listar(params: ConsultaUsuariosQuery): Promise<{
+    usuarios: usuarios[];
+    total: number;
+  }> {
+    const { 
+      page = 1, 
+      limit = 10, 
+      rol, 
+      estaActivo, 
+      search, 
+      orderBy = 'creado_en', 
+      orderDir = 'desc' 
+    } = params;
+    
+    const where: Prisma.usuariosWhereInput = {};
+    
+    if (rol) {
+      where.rol = rol as rol_usuario;
+    }
+    
+    if (estaActivo !== undefined) {
+      where.esta_activo = estaActivo;
+    }
+    
+    if (search) {
+      where.OR = [
+        { nombres: { contains: search, mode: 'insensitive' } },
+        { apellidos: { contains: search, mode: 'insensitive' } },
+        { correo: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+    
+    const skip = (page - 1) * limit;
+    
+    const [usuarios, total] = await Promise.all([
+      conexionBD.usuarios.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { [orderBy]: orderDir },
+      }),
+      conexionBD.usuarios.count({ where }),
+    ]);
+    
+    return { usuarios, total };
   },
 
   async eliminar(id: string): Promise<usuarios> {

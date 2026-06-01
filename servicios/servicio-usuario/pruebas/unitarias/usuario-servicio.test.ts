@@ -45,6 +45,47 @@ describe('UsuarioServicio', () => {
       await expect(servicio.crear(dto)).rejects.toThrow(ErrorNegocio);
       expect(crear).not.toHaveBeenCalled();
     });
+
+    it('deberia asegurarse que la contrasena se guarde encriptada y no en texto plano', async () => {
+      const buscarPorCorreo = jest.fn().mockResolvedValue(null);
+      const crear = jest.fn().mockResolvedValue({ id: 'u2', correo: dto.correo });
+      const hashSimulado = 'hash-completamente-seguro-123';
+      const hashear = jest.fn().mockResolvedValue(hashSimulado);
+
+      const servicio = crearUsuarioServicio({
+        repositorio: { buscarPorCorreo, crear } as never,
+        hasheador: { hashear },
+      });
+
+      await servicio.crear(dto);
+
+      expect(crear).toHaveBeenCalledWith(
+        expect.objectContaining({
+          contrasena_hash: hashSimulado,
+        }),
+      );
+      expect(crear).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          contrasena_hash: dto.contrasena,
+        }),
+      );
+    });
+
+    it('deberia propagar el error y cancelar la creacion si el servicio de hasheo falla', async () => {
+      const buscarPorCorreo = jest.fn().mockResolvedValue(null);
+      const crear = jest.fn();
+      const errorBcrypt = new Error('Fallo interno al encriptar la contrasena');
+      const hashear = jest.fn().mockRejectedValue(errorBcrypt);
+
+      const servicio = crearUsuarioServicio({
+        repositorio: { buscarPorCorreo, crear } as never,
+        hasheador: { hashear },
+      });
+
+      await expect(servicio.crear(dto)).rejects.toThrow('Fallo interno al encriptar la contrasena');
+      
+      expect(crear).not.toHaveBeenCalled();
+    });
   });
 
   describe('eliminarUsuario', () => {
