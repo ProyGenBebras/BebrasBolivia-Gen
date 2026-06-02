@@ -42,22 +42,22 @@ usuarioRutas.post(
 );
 
 // DELETE: Eliminar usuario (REQ-002)
-usuarioRutas.delete(
-  '/:id',
-  resolverIdentidad,
-  verificarRol('administrador'),
-  (req, res, next) => {
-    void usuarioControlador.eliminar(req, res, next);
-  },
-);
+usuarioRutas.delete('/:id', resolverIdentidad, verificarRol('administrador'), (req, res, next) => {
+  void usuarioControlador.eliminar(req, res, next);
+});
 
 // GET: Obtener rol de usuario (REQ-008)
-usuarioRutas.get(
-  '/:id/rol',
+usuarioRutas.get('/:id/rol', resolverIdentidad, verificarRol('administrador'), (req, res, next) => {
+  void usuarioControlador.obtenerRolUsuario(req, res, next);
+});
+
+// PATCH: Activar/desactivar usuario (REQ-006)
+usuarioRutas.patch(
+  '/:id/estado',
   resolverIdentidad,
   verificarRol('administrador'),
   (req, res, next) => {
-    void usuarioControlador.obtenerRolUsuario(req, res, next);
+    void usuarioControlador.cambiarEstadoUsuario(req, res, next);
   },
 );
 
@@ -72,13 +72,9 @@ usuarioRutas.patch(
 );
 
 // POST: Carga masiva de usuarios (REQ-005)
-usuarioRutas.post(
-  '/carga-masiva',
-  upload.single('file'),
-  (req, res) => {
-    void cargaMasivaControlador.cargar(req, res);
-  },
-);
+usuarioRutas.post('/carga-masiva', upload.single('file'), (req, res) => {
+  void cargaMasivaControlador.cargar(req, res);
+});
 
 // GET: Mostrar usuarios (extra)
 usuarioRutas.get(
@@ -86,16 +82,10 @@ usuarioRutas.get(
 
   resolverIdentidad,
 
-  verificarRol(
-    'administrador',
-  ),
+  verificarRol('administrador'),
 
   (req, res, next) => {
-    void usuarioControlador.obtener(
-      req,
-      res,
-      next,
-    );
+    void usuarioControlador.obtener(req, res, next);
   },
 );
 
@@ -105,16 +95,10 @@ usuarioRutas.patch(
 
   resolverIdentidad,
 
-  verificarRol(
-    'administrador',
-  ),
+  verificarRol('administrador'),
 
   (req, res, next) => {
-    void usuarioControlador.actualizar(
-      req,
-      res,
-      next,
-    );
+    void usuarioControlador.actualizar(req, res, next);
   },
 );
 

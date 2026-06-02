@@ -2,6 +2,7 @@ import type { rol_usuario, usuarios } from '@prisma/client';
 import type { NextFunction, Request, Response } from 'express';
 
 import baseDeDatos from '../config/base-de-datos';
+import type { CambiarEstadoUsuarioDto } from '../dtos/cambiar-estado-usuario.dto';
 import type { CambiarRolUsuarioDto } from '../dtos/cambiar-rol-usuario.dto';
 import type { CrearUsuarioDto } from '../dtos/crear-usuario.dto';
 import { RolRepositorio } from '../repositorios/rol-repositorio';
@@ -12,7 +13,7 @@ import { validarConsultaUsuarios } from '../utilidades/validar-consulta-usuarios
 import { validarCrearUsuario } from '../utilidades/validar-crear-usuario';
 
 type UsuarioServicio = ReturnType<typeof crearUsuarioServicio>;
-type PerfilServicio = ReturnType<typeof crearPerfilServicio>
+type PerfilServicio = ReturnType<typeof crearPerfilServicio>;
 
 interface UsuarioPublico {
   id: string;
@@ -36,6 +37,7 @@ interface UsuarioControlador {
   actualizar(req: Request, res: Response, next: NextFunction): Promise<void>;
   obtenerRolUsuario(req: Request, res: Response, next: NextFunction): Promise<void>;
   modificarRolUsuario(req: Request, res: Response, next: NextFunction): Promise<void>;
+  cambiarEstadoUsuario(req: Request, res: Response, next: NextFunction): Promise<void>;
 }
 
 // Nunca se expone contrasena_hash al cliente (regla de seguridad del estandar).
@@ -68,9 +70,9 @@ const validarCambiarRolUsuario = (body: unknown): CambiarRolUsuarioDto => {
     nuevoRol: datos['nuevoRol'] as rol_usuario,
     datosAdicionales:
       datos['datosAdicionales'] !== undefined &&
-        typeof datos['datosAdicionales'] === 'object' &&
-        datos['datosAdicionales'] !== null
-        ? (datos['datosAdicionales'])
+      typeof datos['datosAdicionales'] === 'object' &&
+      datos['datosAdicionales'] !== null
+        ? datos['datosAdicionales']
         : undefined,
   };
 };
@@ -102,11 +104,11 @@ export const crearUsuarioControlador = (
   async listar(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const query = validarConsultaUsuarios(req.query);
-      
+
       const resultado = await servicio.listar(query);
-      res.status(200).json({ 
+      res.status(200).json({
         data: resultado.usuarios.map(aRespuestaPublica),
-        paginacion: resultado.paginacion 
+        paginacion: resultado.paginacion,
       });
     } catch (error) {
       next(error);
@@ -162,6 +164,30 @@ export const crearUsuarioControlador = (
     try {
       const resultado = await rolServicio.obtenerRolUsuario(req.params.id);
       res.status(200).json({ data: resultado });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  // PATCH /api/v1/usuarios/:id/estado
+  // Activa o desactiva un usuario (REQ-006)
+  async cambiarEstadoUsuario(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { id } = req.params;
+      const { estaActivo } = req.body as CambiarEstadoUsuarioDto;
+      const idSolicitante = req.usuario!.id;
+
+      if (typeof estaActivo !== 'boolean') {
+        res.status(400).json({ mensaje: 'El campo estaActivo debe ser un booleano' });
+        return;
+      }
+      if (!id || typeof id !== 'string') {
+        res.status(400).json({ mensaje: 'El id del usuario es requerido' });
+        return;
+      }
+
+      const resultado = await servicio.cambiarEstadoUsuario(id, idSolicitante, estaActivo);
+      res.status(200).json({ data: aRespuestaPublica(resultado) });
     } catch (error) {
       next(error);
     }
