@@ -1,7 +1,7 @@
 import type { usuarios } from '@prisma/client';
 import bcrypt from 'bcrypt';
-import type { ActualizarUsuarioDto } from 'src/dtos/actualizar-usuario.dto';
 
+import type { ActualizarUsuarioDto } from '../dtos/actualizar-usuario.dto';
 import type { ConsultaUsuariosQuery, PaginacionResponse } from '../dtos/consulta-usuarios.dto';
 import type { CrearUsuarioDto } from '../dtos/crear-usuario.dto';
 import {
@@ -25,16 +25,17 @@ interface PerfilServicio {
  */
 export interface HasheadorContrasena {
   hashear(contrasenaPlana: string): Promise<string>;
+  comparar(contrasenaPlana: string, hash: string): Promise<boolean>;
 }
 
-/**
- * Implementacion hasheo usando bcrypt (REQ-04).
- */
 const hasheadorBcrypt: HasheadorContrasena = {
   async hashear(contrasenaPlana: string): Promise<string> {
     const rondasSal = 10;
     return bcrypt.hash(contrasenaPlana, rondasSal);
-  }
+  },
+  async comparar(contrasenaPlana: string, hash: string): Promise<boolean> {
+    return bcrypt.compare(contrasenaPlana, hash);
+  },
 };
 
 interface DependenciasUsuarioServicio {

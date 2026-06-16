@@ -1,7 +1,7 @@
 import type { rol_usuario } from '@prisma/client';
 import type { RequestHandler } from 'express';
 
-import { Accion, PERMISOS_POR_ROL } from '../shared/permisos';
+import { Accion, PERMISOS_POR_ROL } from '../compartido/permisos';
 import { ErrorNoAutenticado, ErrorProhibido } from '../utilidades/errores';
 
 export const verificarRol =

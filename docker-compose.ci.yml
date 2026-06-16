@@ -1,0 +1,6 @@
+services:
+  ci-sim:
+    build:
+      context: .
+      dockerfile: Dockerfile.ci
+    image: bebras-ci-sim

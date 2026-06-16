@@ -16,17 +16,20 @@
     "format:check": "npm run format:check --workspaces --if-present",
     "validate": "npm run format && npm run lint && npm test",
     "clean": "npm run clean --workspaces && rm -rf node_modules",
-    "install:all": "npm ci && npm --prefix servicios ci && npm --prefix servicios/servicio-usuario ci"
+    "install:all": "npm ci && npm --prefix servicios ci && npm --prefix servicios/servicio-usuario ci",
+    "docker:build": "cross-env BUILDX_NO_DEFAULT_ATTESTATIONS=1 docker compose build",
+    "docker:up": "docker compose up -d"
   },
   "engines": {
-    "node": "22.22.2",
-    "npm": "10.9.7"
+    "node": ">=22.22.2",
+    "npm": ">=10.9.0"
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",
     "@typescript-eslint/eslint-plugin": "^8.58.1",
     "@typescript-eslint/parser": "^8.58.1",
     "commitlint": "17.8.1",
+    "cross-env": "^7.0.3",
     "eslint": "^9.39.4",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",

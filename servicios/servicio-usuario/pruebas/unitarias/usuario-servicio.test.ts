@@ -22,7 +22,7 @@ describe('UsuarioServicio', () => {
       const hashear = jest.fn().mockResolvedValue('hash-fake');
       const servicio = crearUsuarioServicio({
         repositorio: { buscarPorCorreo, crear } as never,
-        hasheador: { hashear },
+        hasheador: { hashear, comparar: jest.fn() },
       });
 
       const resultado = await servicio.crear(dto);
@@ -40,7 +40,7 @@ describe('UsuarioServicio', () => {
       const crear = jest.fn();
       const servicio = crearUsuarioServicio({
         repositorio: { buscarPorCorreo, crear } as never,
-        hasheador: { hashear: jest.fn() },
+        hasheador: { hashear: jest.fn(), comparar: jest.fn() },
       });
 
       await expect(servicio.crear(dto)).rejects.toThrow(ErrorNegocio);
@@ -55,7 +55,7 @@ describe('UsuarioServicio', () => {
 
       const servicio = crearUsuarioServicio({
         repositorio: { buscarPorCorreo, crear } as never,
-        hasheador: { hashear },
+        hasheador: { hashear, comparar: jest.fn() },
       });
 
       await servicio.crear(dto);
@@ -80,7 +80,7 @@ describe('UsuarioServicio', () => {
 
       const servicio = crearUsuarioServicio({
         repositorio: { buscarPorCorreo, crear } as never,
-        hasheador: { hashear },
+        hasheador: { hashear, comparar: jest.fn() },
       });
 
       await expect(servicio.crear(dto)).rejects.toThrow('Fallo interno al encriptar la contrasena');
@@ -110,7 +110,7 @@ describe('UsuarioServicio', () => {
       const eliminar = jest.fn().mockResolvedValue({ ...usuarioObjetivoMock, esta_activo: false });
       const servicio = crearUsuarioServicio({
         repositorio: { buscarPorId, eliminar } as never,
-        hasheador: { hashear: jest.fn() },
+        hasheador: { hashear: jest.fn(), comparar: jest.fn() },
       });
 
       const resultado = await servicio.eliminarUsuario(usuarioObjetivoMock.id, adminMock.id);
@@ -123,7 +123,7 @@ describe('UsuarioServicio', () => {
       const buscarPorId = jest.fn().mockResolvedValue({ ...adminMock, rol: 'profesor' });
       const servicio = crearUsuarioServicio({
         repositorio: { buscarPorId } as never,
-        hasheador: { hashear: jest.fn() },
+        hasheador: { hashear: jest.fn(), comparar: jest.fn() },
       });
 
       await expect(servicio.eliminarUsuario(usuarioObjetivoMock.id, adminMock.id)).rejects.toThrow(
@@ -135,7 +135,7 @@ describe('UsuarioServicio', () => {
       const buscarPorId = jest.fn().mockResolvedValueOnce(adminMock).mockResolvedValueOnce(null);
       const servicio = crearUsuarioServicio({
         repositorio: { buscarPorId } as never,
-        hasheador: { hashear: jest.fn() },
+        hasheador: { hashear: jest.fn(), comparar: jest.fn() },
       });
 
       await expect(servicio.eliminarUsuario('uuid-inexistente', adminMock.id)).rejects.toThrow(
@@ -151,7 +151,7 @@ describe('UsuarioServicio', () => {
         .mockResolvedValueOnce(usuarioYaEliminado);
       const servicio = crearUsuarioServicio({
         repositorio: { buscarPorId } as never,
-        hasheador: { hashear: jest.fn() },
+        hasheador: { hashear: jest.fn(), comparar: jest.fn() },
       });
 
       await expect(servicio.eliminarUsuario(usuarioObjetivoMock.id, adminMock.id)).rejects.toThrow(

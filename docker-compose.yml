@@ -1,47 +1,94 @@
-version: '3.8'
-
 services:
+  # ===========================================================
   # BASE DE DATOS
+  # ===========================================================
   postgres_db:
-    image: postgres:15-alpine
+    # Alineado con el origen/Neon (PostgreSQL 18) para paridad dev<->prod
+    image: postgres:18-alpine
     container_name: bebras_db
-    restart: always
+    restart: unless-stopped
     environment:
-      # Estos 3 los define: MODELO BD Y REPOS
-      POSTGRES_USER: dev_user           
-      POSTGRES_PASSWORD: dev_password   
-      POSTGRES_DB: bebras_bolivia       
+      # Credenciales: defaults para desarrollo local; en produccion se inyectan
+      # via .env (lo escribe scripts/deploy.sh desde los Secrets de GitHub).
+      POSTGRES_USER: ${DB_USER:-dev_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-dev_password}
+      POSTGRES_DB: ${DB_NAME:-bebras_bolivia}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      # Crea la BD de pruebas (bebras_bolivia_test) al inicializar un volumen nuevo
+      - ./scripts/db:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-dev_user} -d ${DB_NAME:-bebras_bolivia}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
-  # SECCIÓN DE APLICACIÓN
-  auth-service:
+  # ===========================================================
+  # BACKEND - Servicio de Usuario (Express + Prisma)
+  # ===========================================================
+  user-service:
     build:
-      context: .
-      # Define la ruta: MODELO BD Y REPOS
-      dockerfile: servicios/servicio-autenticacion/Dockerfile 
-    container_name: auth_svc
-    volumes:
-      - .:/usr/src/app
-      - /usr/src/app/node_modules
+      context: ./servicios/servicio-usuario
+      dockerfile: Dockerfile
+      target: runtime
+    container_name: bebras_user_svc
+    restart: unless-stopped
     environment:
-      - NODE_ENV=development            # ESTÁNDARES DE CODIFICACIÓN
-      
-      # 1. Los datos (user/pass) vienen de: MODELO BD Y REPOS
-      # 2. La seguridad de la conexión viene de: DDOS, TLS, INYECCION
-      - DB_URL=postgres://dev_user:dev_password@postgres_db:5432/bebras_bolivia
-      
-      # CERTIFICADOS Y FIRMAS DIGITALES
-
+      NODE_ENV: production
+      USER_SERVICE_PORT: 4102
+      # Conexión a la BD del contenedor postgres_db.
+      # ?schema=bebras => _prisma_migrations vive en "bebras" (requerido por multiSchema;
+      # sin esto, migrate deploy falla con "migration persistence is not initialized").
+      DATABASE_URL: postgresql://${DB_USER:-dev_user}:${DB_PASSWORD:-dev_password}@postgres_db:5432/${DB_NAME:-bebras_bolivia}?schema=bebras
+      # Origen permitido por CORS (en produccion: http://IP-DEL-SERVIDOR:3000)
+      URL_CLIENTE: ${URL_CLIENTE:-http://localhost:3000}
+      # Semilla. En produccion definir SEED_ADMIN_* con secretos reales
+      # y SEED_DATOS_DEMO=false (lo gestiona scripts/deploy.sh).
+      SEED_ADMIN_CORREO: ${SEED_ADMIN_CORREO:-admin@bebras.bo}
+      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-Admin1234}
+      SEED_DATOS_DEMO: ${SEED_DATOS_DEMO:-true}
+      # JWT — en produccion JWT_SECRET se inyecta via .env (Secret de GitHub)
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-cambiar-en-produccion-minimo-32-caracteres}
+      JWT_EXPIRACION: ${JWT_EXPIRACION:-15m}
+      JWT_REFRESH_EXPIRACION: ${JWT_REFRESH_EXPIRACION:-7d}
     ports:
-      - "3001:3001"
+      - "4102:4102"
+    # El arranque (crear esquema -> migrar -> seed -> servir) está en el CMD del Dockerfile.
     depends_on:
-      - postgres_db
+      postgres_db:
+        condition: service_healthy
+    healthcheck:
+      # node está disponible en la imagen; evita depender de curl/wget
+      test: ["CMD", "node", "-e", "fetch('http://localhost:4102/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      # Migra + siembra al iniciar; ya no transpila (corre dist/ compilado, no tsx)
+      start_period: 30s
 
-# RECURSOS ADICIONALES
+  # ===========================================================
+  # FRONTEND - Cliente (Next.js)
+  # ===========================================================
+  cliente:
+    build:
+      context: ./cliente
+      dockerfile: Dockerfile
+      args:
+        # URL del backend accesible desde el NAVEGADOR del usuario (se incrusta en build-time).
+        # En produccion: http://IP-DEL-SERVIDOR:4102/api/v1
+        NEXT_PUBLIC_API_URL: ${API_URL_PUBLICA:-http://localhost:4102/api/v1}
+    container_name: bebras_cliente
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      user-service:
+        condition: service_healthy
+
+# ===========================================================
+# VOLÚMENES
+# ===========================================================
 volumes:
   postgres_data:
-
-# REDIS

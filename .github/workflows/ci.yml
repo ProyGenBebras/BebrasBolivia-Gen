@@ -1,7 +1,8 @@
 name: CI
 on:
+  # main lo cubre deploy.yml (CI + CD); aqui solo validamos develop y los PRs.
   push:
-    branches: [main, develop]
+    branches: [develop]
   pull_request:
     branches: [main, develop]
 
@@ -11,6 +12,24 @@ concurrency:
 jobs:
   calidad:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: dev_user
+          POSTGRES_PASSWORD: dev_password
+          POSTGRES_DB: bebras_bolivia_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U dev_user -d bebras_bolivia_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      # BD efímera del job: el test de conectividad corre contra Postgres real
+      DATABASE_URL: postgresql://dev_user:dev_password@localhost:5432/bebras_bolivia_test?schema=bebras
+      RUN_DB_INTEGRATION_TESTS: 'true'
     steps:
       - name: Code Checkout
         uses: actions/checkout@v4
@@ -27,6 +46,12 @@ jobs:
         run: npm run lint
       - name: Auditoria de seguridad
         run: npm audit --audit-level=high || true
+      - name: Preparar base de datos de pruebas
+        working-directory: servicios/servicio-usuario
+        run: |
+          npx prisma generate --schema prisma/schema.prisma
+          echo 'CREATE SCHEMA IF NOT EXISTS "bebras";' | npx prisma db execute --schema prisma/schema.prisma --stdin
+          npx prisma migrate deploy --schema prisma/schema.prisma
       - name: Pruebas con cobertura
         run: npm test
       - name: Build

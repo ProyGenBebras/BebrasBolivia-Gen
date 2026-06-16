@@ -1,0 +1,80 @@
+name: Pipeline de Integracion y Despliegue Continuo (CI/CD)
+on:
+  push:
+    branches: [main] # CI + despliegue solo al confirmar cambios en main
+
+concurrency:
+  group: cicd-${{ github.ref }}
+  cancel-in-progress: false # no abortar un despliegue a medias
+
+jobs:
+  # ---------------------------------------------------------------
+  # FASE CI: entorno virtual limpio de GitHub. Si falla, no hay despliegue.
+  # ---------------------------------------------------------------
+  fase-integracion-continua:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: dev_user
+          POSTGRES_PASSWORD: dev_password
+          POSTGRES_DB: bebras_bolivia_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U dev_user -d bebras_bolivia_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://dev_user:dev_password@localhost:5432/bebras_bolivia_test?schema=bebras
+      RUN_DB_INTEGRATION_TESTS: 'true'
+    steps:
+      - name: Descargar el codigo fuente
+        uses: actions/checkout@v4
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.22.2'
+          cache: 'npm'
+      - name: Instalar dependencias (monorepo)
+        run: npm run install:all
+      - name: Verificar formato
+        run: npm run format:check
+      - name: Analisis estatico
+        run: npm run lint
+      - name: Auditoria de seguridad
+        run: npm audit --audit-level=high || true
+      - name: Preparar base de datos de pruebas
+        working-directory: servicios/servicio-usuario
+        run: |
+          npx prisma generate --schema prisma/schema.prisma
+          echo 'CREATE SCHEMA IF NOT EXISTS "bebras";' | npx prisma db execute --schema prisma/schema.prisma --stdin
+          npx prisma migrate deploy --schema prisma/schema.prisma
+      - name: Pruebas unitarias y de integracion (CI)
+        run: npm test
+      - name: Build de produccion
+        run: npm run build
+
+  # ---------------------------------------------------------------
+  # FASE CD: se ejecuta en el Self-Hosted Runner del servidor Ubuntu.
+  # 'needs' bloquea el despliegue si la fase de CI falla.
+  # ---------------------------------------------------------------
+  fase-despliegue-continuo:
+    needs: fase-integracion-continua
+    runs-on: self-hosted
+    steps:
+      - name: Descargar el codigo actualizado en el servidor local
+        uses: actions/checkout@v4
+      - name: Desplegar el stack e inyectar secretos
+        run: |
+          chmod +x scripts/deploy.sh
+          scripts/deploy.sh \
+            "${{ secrets.DB_USER }}" \
+            "${{ secrets.DB_PASSWORD }}" \
+            "${{ secrets.DB_NAME }}" \
+            "${{ secrets.SEED_ADMIN_CORREO }}" \
+            "${{ secrets.SEED_ADMIN_PASSWORD }}" \
+            "${{ secrets.API_URL_PUBLICA }}" \
+            "${{ secrets.URL_CLIENTE }}"

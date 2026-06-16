@@ -8,6 +8,7 @@ import type { CrearUsuarioDto } from '../dtos/crear-usuario.dto';
 import { RolRepositorio } from '../repositorios/rol-repositorio';
 import { RolServicio } from '../servicios/rol-servicio';
 import { crearPerfilServicio, crearUsuarioServicio } from '../servicios/usuario-servicio';
+import { ErrorNegocio } from '../utilidades/errores';
 import { validarActualizarPerfil } from '../utilidades/validar-actualizar-perfil';
 import { validarConsultaUsuarios } from '../utilidades/validar-consulta-usuarios';
 import { validarCrearUsuario } from '../utilidades/validar-crear-usuario';
@@ -140,13 +141,7 @@ export const crearUsuarioControlador = (
 
   async actualizar(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const idSolicitante = req.headers['x-usuario-id'];
-
-      if (!idSolicitante || typeof idSolicitante !== 'string') {
-        res.status(400).json({ mensaje: 'Falta el identificador del solicitante' });
-        return;
-      }
-
+      const idSolicitante = req.usuario!.id;
       const dto = validarActualizarPerfil(req.body);
       const actualizado = await perfilServicio.actualizar(req.params.id, dto, idSolicitante);
       res.status(200).json({ data: aRespuestaPublica(actualizado) });
@@ -178,12 +173,7 @@ export const crearUsuarioControlador = (
       const idSolicitante = req.usuario!.id;
 
       if (typeof estaActivo !== 'boolean') {
-        res.status(400).json({ mensaje: 'El campo estaActivo debe ser un booleano' });
-        return;
-      }
-      if (!id || typeof id !== 'string') {
-        res.status(400).json({ mensaje: 'El id del usuario es requerido' });
-        return;
+        throw new ErrorNegocio('El campo estaActivo debe ser un booleano', 400);
       }
 
       const resultado = await servicio.cambiarEstadoUsuario(id, idSolicitante, estaActivo);

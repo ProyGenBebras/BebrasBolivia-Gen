@@ -5,7 +5,7 @@ import { crearUsuarioControlador } from '../../src/controladores/usuario-control
 import { verificarPermiso, verificarRol } from '../../src/middlewares/autorizar';
 import { crearResolverIdentidad } from '../../src/middlewares/resolver-identidad';
 import { crearUsuarioServicio } from '../../src/servicios/usuario-servicio';
-import { Accion } from '../../src/shared/permisos';
+import { Accion } from '../../src/compartido/permisos';
 import { ErrorNegocio } from '../../src/utilidades/errores';
 
 const usuarioAdmin = {
@@ -63,7 +63,7 @@ const crearAppDePrueba = (usuarioBD: unknown) => {
       }),
       eliminar: jest.fn().mockResolvedValue({ ...usuarioObjetivo, esta_activo: false }),
     } as never,
-    hasheador: { hashear: jest.fn().mockResolvedValue('hash-seguro') },
+    hasheador: { hashear: jest.fn().mockResolvedValue('hash-seguro'), comparar: jest.fn() },
   });
 
   const controlador = crearUsuarioControlador(servicio);

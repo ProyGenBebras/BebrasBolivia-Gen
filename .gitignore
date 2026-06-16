@@ -86,6 +86,12 @@ Thumbs.db
 Desktop.ini
 
 # ------------------------------------------------------------
+# Skills (instaladas localmente, no se versionan)
+# ------------------------------------------------------------
+.agents/
+skills-lock.json
+
+# ------------------------------------------------------------
 # Optional local runtime data
 # Uncomment if your team does not version local SQLite DBs
 # ------------------------------------------------------------

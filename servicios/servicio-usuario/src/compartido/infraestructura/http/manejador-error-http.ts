@@ -1,5 +1,7 @@
 import type { ErrorRequestHandler, RequestHandler } from 'express';
 
+import { ErrorNegocio } from '../../../utilidades/errores';
+
 import { crearErrorNoEncontrado } from './error-aplicacion';
 
 interface ErrorHttp extends Error {
@@ -9,6 +11,10 @@ interface ErrorHttp extends Error {
 }
 
 function obtenerEstadoHttp(error: ErrorHttp): number {
+  // ErrorNegocio (dominio) guarda el estado HTTP en `codigo` (número)
+  if (error instanceof ErrorNegocio) {
+    return error.codigo;
+  }
   return error.status ?? error.statusCode ?? 500;
 }
 
@@ -21,7 +27,8 @@ function obtenerMensajeSeguro(error: ErrorHttp, estado: number): string {
 }
 
 function obtenerCodigoError(error: ErrorHttp, estado: number): string {
-  if (error.codigo) {
+  // Solo el código de texto (ErrorAplicacion); el codigo numérico de ErrorNegocio se ignora aquí
+  if (typeof error.codigo === 'string') {
     return error.codigo;
   }
 

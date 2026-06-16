@@ -1,11 +1,11 @@
 import { Router } from 'express';
 import multer from 'multer';
 
+import { Accion } from '../compartido/permisos';
 import { CargaMasivaControlador } from '../controladores/carga-masiva.controlador';
 import { usuarioControlador } from '../controladores/usuario-controlador';
+import { autenticarJwt } from '../middlewares/autenticar-jwt';
 import { verificarPermiso, verificarRol } from '../middlewares/autorizar';
-import { resolverIdentidad } from '../middlewares/resolver-identidad';
-import { Accion } from '../shared/permisos';
 
 const usuarioRutas: Router = Router();
 
@@ -26,15 +26,20 @@ const cargaMasivaControlador = new CargaMasivaControlador();
  * POST /carga-masiva - Carga masiva de usuarios (REQ-005)
  */
 
-// GET: Listar usuarios con paginación y filtros (REQ-010) - TU ENDPOINT
-usuarioRutas.get('/', (req, res, next) => {
-  void usuarioControlador.listar(req, res, next);
-});
+// GET: Listar usuarios con paginación y filtros (REQ-010)
+usuarioRutas.get(
+  '/',
+  autenticarJwt,
+  verificarPermiso(Accion.LISTAR_USUARIOS),
+  (req, res, next) => {
+    void usuarioControlador.listar(req, res, next);
+  },
+);
 
 // POST: Crear usuario manualmente (REQ-004)
 usuarioRutas.post(
   '/',
-  resolverIdentidad,
+  autenticarJwt,
   verificarPermiso(Accion.CREAR_USUARIO),
   (req, res, next) => {
     void usuarioControlador.crear(req, res, next);
@@ -42,19 +47,19 @@ usuarioRutas.post(
 );
 
 // DELETE: Eliminar usuario (REQ-002)
-usuarioRutas.delete('/:id', resolverIdentidad, verificarRol('administrador'), (req, res, next) => {
+usuarioRutas.delete('/:id', autenticarJwt, verificarRol('administrador'), (req, res, next) => {
   void usuarioControlador.eliminar(req, res, next);
 });
 
 // GET: Obtener rol de usuario (REQ-008)
-usuarioRutas.get('/:id/rol', resolverIdentidad, verificarRol('administrador'), (req, res, next) => {
+usuarioRutas.get('/:id/rol', autenticarJwt, verificarRol('administrador'), (req, res, next) => {
   void usuarioControlador.obtenerRolUsuario(req, res, next);
 });
 
 // PATCH: Activar/desactivar usuario (REQ-006)
 usuarioRutas.patch(
   '/:id/estado',
-  resolverIdentidad,
+  autenticarJwt,
   verificarRol('administrador'),
   (req, res, next) => {
     void usuarioControlador.cambiarEstadoUsuario(req, res, next);
@@ -64,7 +69,7 @@ usuarioRutas.patch(
 // PATCH: Modificar rol de usuario (REQ-008)
 usuarioRutas.patch(
   '/:id/rol',
-  resolverIdentidad,
+  autenticarJwt,
   verificarRol('administrador'),
   (req, res, next) => {
     void usuarioControlador.modificarRolUsuario(req, res, next);
@@ -72,15 +77,21 @@ usuarioRutas.patch(
 );
 
 // POST: Carga masiva de usuarios (REQ-005)
-usuarioRutas.post('/carga-masiva', upload.single('file'), (req, res) => {
-  void cargaMasivaControlador.cargar(req, res);
-});
+usuarioRutas.post(
+  '/carga-masiva',
+  autenticarJwt,
+  verificarPermiso(Accion.CREAR_USUARIO),
+  upload.single('file'),
+  (req, res) => {
+    void cargaMasivaControlador.cargar(req, res);
+  },
+);
 
 // GET: Mostrar usuarios (extra)
 usuarioRutas.get(
   '/:id',
 
-  resolverIdentidad,
+  autenticarJwt,
 
   verificarRol('administrador'),
 
@@ -93,7 +104,7 @@ usuarioRutas.get(
 usuarioRutas.patch(
   '/:id',
 
-  resolverIdentidad,
+  autenticarJwt,
 
   verificarRol('administrador'),
 

@@ -1,8 +1,7 @@
 import type { NextFunction, Request, Response } from 'express';
 
-import type { CambiarRolDto } from '../dtos/rol.dto.js';
-import { RolServicio } from '../servicios/rol-servicio.js';
-import { ErrorNegocio } from '../utilidades/errores.js';
+import { RolServicio } from '../servicios/rol-servicio';
+import { ErrorNegocio } from '../utilidades/errores';
 
 export class RolControlador {
     constructor(private readonly rolServicio: RolServicio) { }
@@ -34,30 +33,6 @@ export class RolControlador {
         }
     };
 
-    // PATCH /api/v1/roles/asignar
-    cambiarRol = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-        try {
-            const body = req.body as Partial<CambiarRolDto>;
-            
-            if (!body.usuarioId || !body.nuevoRol) {
-                res.status(400).json({ error: 'Los campos usuarioId y nuevoRol son requeridos' });
-                return;
-            }
-
-            const datos: CambiarRolDto = {
-                usuarioId: body.usuarioId,
-                nuevoRol: body.nuevoRol,
-            };
-
-            const usuarioActualizado = await this.rolServicio.cambiarRol(datos);
-            res.status(200).json({ 
-                mensaje: 'Rol actualizado correctamente',
-                data: usuarioActualizado 
-            });
-        } catch (error) {
-            next(error);
-        }
-    };
 }
 
 export function manejarErrorNegocio(

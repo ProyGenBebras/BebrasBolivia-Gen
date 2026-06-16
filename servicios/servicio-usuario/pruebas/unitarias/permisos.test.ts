@@ -1,4 +1,4 @@
-import { Accion, PERMISOS_POR_ROL } from '../../src/shared/permisos';
+import { Accion, PERMISOS_POR_ROL } from '../../src/compartido/permisos';
 
 describe('PERMISOS_POR_ROL', () => {
   describe('administrador', () => {

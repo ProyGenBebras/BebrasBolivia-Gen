@@ -1,11 +1,11 @@
 import { PrismaClient } from '@prisma/client';
 import { Router } from 'express';
-import { manejarErrorNegocio, RolControlador } from 'src/controladores/rol-controlador.js';
 
-import { verificarRol } from '../middlewares/autorizar.js';
-import { resolverIdentidad } from '../middlewares/resolver-identidad.js';
-import { RolRepositorio } from '../repositorios/rol-repositorio.js';
-import { RolServicio } from '../servicios/rol-servicio.js';
+import { manejarErrorNegocio, RolControlador } from '../controladores/rol-controlador';
+import { autenticarJwt } from '../middlewares/autenticar-jwt';
+import { verificarRol } from '../middlewares/autorizar';
+import { RolRepositorio } from '../repositorios/rol-repositorio';
+import { RolServicio } from '../servicios/rol-servicio';
 
 const prisma = new PrismaClient();
 const rolRepositorio = new RolRepositorio(prisma);
@@ -18,13 +18,8 @@ const rolRutas: Router = Router();
 rolRutas.get('/', rolControlador.listarRolesDisponibles);
 
 // GET /api/v1/roles/:rol/usuarios — lista usuarios que tienen ese rol
-rolRutas.get('/:rol/usuarios', resolverIdentidad, verificarRol('administrador'), (req, res, next) => {
+rolRutas.get('/:rol/usuarios', autenticarJwt,verificarRol('administrador'), (req, res, next) => {
     void rolControlador.obtenerUsuariosPorRol(req, res, next);
-});
-
-// PATCH /api/v1/roles/asignar — cambia el rol de un usuario (basico, sin extensiones)
-rolRutas.patch('/asignar', resolverIdentidad, verificarRol('administrador'), (req, res, next) => {
-    void rolControlador.cambiarRol(req, res, next);
 });
 
 // Middleware de manejo de errores de negocio especifico de este router

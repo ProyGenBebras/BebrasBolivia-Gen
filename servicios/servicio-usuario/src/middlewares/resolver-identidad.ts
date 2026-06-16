@@ -1,8 +1,8 @@
 import type { PrismaClient } from '@prisma/client';
 import type { RequestHandler } from 'express';
 
+import type { UsuarioAutenticado } from '../compartido/tipos/usuario-autenticado';
 import baseDeDatos from '../config/base-de-datos';
-import type { UsuarioAutenticado } from '../shared/tipos/usuario-autenticado';
 import { ErrorNoAutenticado } from '../utilidades/errores';
 
 type ConexionBD = Pick<PrismaClient, 'usuarios'>;

@@ -1,7 +1,6 @@
 import { rol_usuario } from '@prisma/client';
 
 import type { CambiarRolUsuarioDto } from '../dtos/cambiar-rol-usuario.dto';
-import type { CambiarRolDto } from '../dtos/rol.dto';
 import type { RolRepositorio } from '../repositorios/rol-repositorio';
 import { ErrorNegocio } from '../utilidades/errores';
 
@@ -19,21 +18,6 @@ export class RolServicio {
       throw new ErrorNegocio(`El rol '${rol}' no es válido.`, 400);
     }
     return this.rolRepositorio.obtenerUsuariosPorRol(rol as rol_usuario);
-  }
-
-  async cambiarRol(
-    datos: CambiarRolDto,
-  ): Promise<{ id: string; nombres: string; correo: string; rol: rol_usuario }> {
-    if (!Object.values(rol_usuario).includes(datos.nuevoRol)) {
-      throw new ErrorNegocio(`El rol '${datos.nuevoRol}' no es válido.`, 400);
-    }
-
-    const usuario = await this.rolRepositorio.verificarUsuarioExiste(datos.usuarioId);
-    if (!usuario) {
-      throw new ErrorNegocio(`Usuario con id ${datos.usuarioId} no encontrado`, 404);
-    }
-
-    return this.rolRepositorio.actualizarRolUsuario(datos.usuarioId, datos.nuevoRol);
   }
 
   async obtenerRolUsuario(

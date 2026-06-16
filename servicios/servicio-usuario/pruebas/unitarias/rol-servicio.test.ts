@@ -16,7 +16,6 @@ import { ErrorNegocio } from '../../src/utilidades/errores';
 
 const mockRolRepositorio = {
   obtenerUsuariosPorRol: jest.fn(),
-  actualizarRolUsuario: jest.fn(),
   verificarUsuarioExiste: jest.fn(),
   obtenerUsuarioConRol: jest.fn(),
   contarAdministradores: jest.fn(),

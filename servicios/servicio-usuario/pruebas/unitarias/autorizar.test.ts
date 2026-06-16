@@ -1,8 +1,8 @@
 import type { Request, Response } from 'express';
 
 import { verificarPermiso, verificarRol } from '../../src/middlewares/autorizar';
-import { Accion } from '../../src/shared/permisos';
-import type { UsuarioAutenticado } from '../../src/shared/tipos/usuario-autenticado';
+import { Accion } from '../../src/compartido/permisos';
+import type { UsuarioAutenticado } from '../../src/compartido/tipos/usuario-autenticado';
 import { ErrorNoAutenticado, ErrorProhibido } from '../../src/utilidades/errores';
 
 const next = jest.fn();
