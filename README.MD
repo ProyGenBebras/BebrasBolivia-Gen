@@ -20,7 +20,7 @@ nvm use
 npm run install:all
 ```
 
-## Modo A — Solo BD en Docker (recomendado para desarrollo con hot-reload)
+## Modo A — Solo BD en Docker (recomendado si solo quieres que tu base de datos este en docker con la version correcta)
 
 ```bash
 # 1. Levantar solo la base de datos
@@ -41,7 +41,7 @@ npm run dev --workspace=cliente
 
 > El seed es idempotente — puedes correrlo varias veces sin duplicar datos.
 
-## Modo B — Todo en Docker (DB + backend + frontend)
+## Modo B — Todo en Docker (Recomendado si no quieres descargar versiones especificas en tu  ya que va estar la DB + backend + frontend)
 
 ```bash
 npm run docker:build   # construye las imágenes
