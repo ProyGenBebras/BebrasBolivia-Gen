@@ -16,7 +16,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql
       # Crea la BD de pruebas (bebras_bolivia_test) al inicializar un volumen nuevo
       - ./scripts/db:/docker-entrypoint-initdb.d:ro
     healthcheck:

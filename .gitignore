@@ -92,6 +92,12 @@ Desktop.ini
 skills-lock.json
 
 # ------------------------------------------------------------
+# Claude Code (instrucciones locales, no se versionan)
+# ------------------------------------------------------------
+CLAUDE.md
+.claude/
+
+# ------------------------------------------------------------
 # Optional local runtime data
 # Uncomment if your team does not version local SQLite DBs
 # ------------------------------------------------------------
