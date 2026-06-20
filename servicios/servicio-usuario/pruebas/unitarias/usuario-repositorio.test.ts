@@ -135,4 +135,40 @@ describe('UsuarioRepositorio', () => {
     });
     expect(resultado.esta_activo).toBe(false);
   });
+
+  // ─── Tests para buscarPorNombre ──────────────────────────────────────
+
+  it('deberia buscar usuarios por nombre usando findMany con filtro OR', async () => {
+    const usuariosEncontrados = [
+      { id: 'u1', nombres: 'Juan', apellidos: 'Perez' },
+      { id: 'u2', nombres: 'Juana', apellidos: 'Lopez' },
+    ];
+    const findMany = jest.fn().mockResolvedValue(usuariosEncontrados);
+    const repositorio = crearUsuarioRepositorio({
+      usuarios: { findUnique: jest.fn(), findFirst: jest.fn(), findMany },
+    } as never);
+
+    const resultado = await repositorio.buscarPorNombre('juan');
+
+    expect(findMany).toHaveBeenCalledWith({
+      where: {
+        OR: [
+          { nombres: { contains: 'juan', mode: 'insensitive' } },
+          { apellidos: { contains: 'juan', mode: 'insensitive' } },
+        ],
+      },
+    });
+    expect(resultado).toEqual(usuariosEncontrados);
+  });
+
+  it('deberia retornar array vacio cuando no hay coincidencias por nombre', async () => {
+    const findMany = jest.fn().mockResolvedValue([]);
+    const repositorio = crearUsuarioRepositorio({
+      usuarios: { findUnique: jest.fn(), findFirst: jest.fn(), findMany },
+    } as never);
+
+    const resultado = await repositorio.buscarPorNombre('nombreinexistente');
+
+    expect(resultado).toEqual([]);
+  });
 });

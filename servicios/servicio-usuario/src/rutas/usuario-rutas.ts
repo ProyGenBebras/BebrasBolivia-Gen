@@ -87,6 +87,16 @@ usuarioRutas.post(
   },
 );
 
+// GET: Buscar usuarios por nombre o apellido
+usuarioRutas.get(
+  '/buscar',
+  autenticarJwt,
+  verificarPermiso(Accion.LISTAR_USUARIOS),
+  (req, res, next) => {
+    void usuarioControlador.buscarPorNombre(req, res, next);
+  },
+);
+
 // GET: Mostrar usuarios (extra)
 usuarioRutas.get(
   '/:id',
