@@ -33,6 +33,7 @@ interface UsuarioPublico {
 interface UsuarioControlador {
   crear(req: Request, res: Response, next: NextFunction): Promise<void>;
   listar(req: Request, res: Response, next: NextFunction): Promise<void>;
+  buscarPorNombre(req: Request, res: Response, next: NextFunction): Promise<void>;
   eliminar(req: Request, res: Response, next: NextFunction): Promise<void>;
   obtener(req: Request, res: Response, next: NextFunction): Promise<void>;
   actualizar(req: Request, res: Response, next: NextFunction): Promise<void>;
@@ -111,6 +112,20 @@ export const crearUsuarioControlador = (
         data: resultado.usuarios.map(aRespuestaPublica),
         paginacion: resultado.paginacion,
       });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  /**
+   * GET /api/v1/usuarios/buscar?nombre=...
+   * Busca usuarios por nombre o apellido (parcial, insensible a mayúsculas).
+   */
+  async buscarPorNombre(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const nombre = req.query.nombre as string;
+      const usuarios = await servicio.buscarPorNombre(nombre);
+      res.status(200).json({ data: usuarios.map(aRespuestaPublica) });
     } catch (error) {
       next(error);
     }

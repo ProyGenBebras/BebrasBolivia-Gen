@@ -22,6 +22,7 @@ type UsuarioRepositorio = {
   buscarPorCorreoExcluyendo(correo: string, idExcluir: string): Promise<usuarios | null>;
   actualizarPerfil(id: string, datos: DatosActualizarUsuario): Promise<usuarios>;
   listar(params: ConsultaUsuariosQuery): Promise<{ usuarios: usuarios[]; total: number }>;
+  buscarPorNombre(nombre: string): Promise<usuarios[]>;
   eliminar(id: string): Promise<usuarios>;
   actualizarEstadoActivo(id: string, estaActivo: boolean): Promise<usuarios>;
   registrarIntentoFallido(id: string): Promise<usuarios>;
@@ -105,6 +106,17 @@ export const crearUsuarioRepositorio = (conexionBD: ConexionBD): UsuarioReposito
     ]);
     
     return { usuarios, total };
+  },
+
+  async buscarPorNombre(nombre: string): Promise<usuarios[]> {
+    return conexionBD.usuarios.findMany({
+      where: {
+        OR: [
+          { nombres: { contains: nombre, mode: 'insensitive' } },
+          { apellidos: { contains: nombre, mode: 'insensitive' } },
+        ],
+      },
+    });
   },
 
   async eliminar(id: string): Promise<usuarios> {

@@ -208,7 +208,39 @@ describe('UsuarioServicio', () => {
       expect(resultado.paginacion.totalPages).toBe(3); // 25 / 10 = 2.5 -> 3
     });
   });
+
+  describe('buscarPorNombre', () => {
+    it('deberia delegar al repositorio con el nombre recortado', async () => {
+      const usuariosEncontrados = [{ id: 'u1', nombres: 'Juan', apellidos: 'Perez' }];
+      const buscarPorNombre = jest.fn().mockResolvedValue(usuariosEncontrados);
+      const servicio = crearUsuarioServicio({
+        repositorio: { buscarPorNombre } as never,
+      });
+
+      const resultado = await servicio.buscarPorNombre('  Juan  ');
+
+      expect(buscarPorNombre).toHaveBeenCalledWith('Juan');
+      expect(resultado).toEqual(usuariosEncontrados);
+    });
+
+    it('deberia lanzar ErrorNegocio 400 cuando el nombre esta vacio', async () => {
+      const servicio = crearUsuarioServicio({ repositorio: {} as never });
+
+      await expect(servicio.buscarPorNombre('')).rejects.toThrow(
+        new ErrorNegocio('El parámetro nombre es requerido', 400),
+      );
+    });
+
+    it('deberia lanzar ErrorNegocio 400 cuando el nombre es solo espacios', async () => {
+      const servicio = crearUsuarioServicio({ repositorio: {} as never });
+
+      await expect(servicio.buscarPorNombre('   ')).rejects.toThrow(
+        new ErrorNegocio('El parámetro nombre es requerido', 400),
+      );
+    });
+  });
 });
+
 
 // ─── Tests para PerfilServicio (obtener + actualizar / PATCH) ───────────
 
