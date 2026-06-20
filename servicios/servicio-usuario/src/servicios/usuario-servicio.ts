@@ -49,6 +49,7 @@ interface UsuarioServicio {
     usuarios: usuarios[];
     paginacion: PaginacionResponse;
   }>;
+  buscarPorNombre(nombre: string): Promise<usuarios[]>;
   eliminarUsuario(idUsuario: string, idSolicitante: string): Promise<usuarios>;
   cambiarEstadoUsuario(idUsuario: string, idSolicitante: string, estaActivo: boolean): Promise<usuarios>;
 }
@@ -102,6 +103,17 @@ export const crearUsuarioServicio = (
           totalPages: Math.ceil(total / limit),
         },
       };
+    },
+
+    /**
+     * Busca usuarios por nombre o apellido (REQ-010)
+     * La búsqueda es parcial e insensible a mayúsculas.
+     */
+    async buscarPorNombre(nombre: string): Promise<usuarios[]> {
+      if (!nombre || nombre.trim() === '') {
+        throw new ErrorNegocio('El parámetro nombre es requerido', 400);
+      }
+      return repositorio.buscarPorNombre(nombre.trim());
     },
 
     /**

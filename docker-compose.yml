@@ -14,13 +14,13 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD:-dev_password}
       POSTGRES_DB: ${DB_NAME:-bebras_bolivia}
     ports:
-      - "5432:5432"
+      - '5431:5432'
     volumes:
       - postgres_data:/var/lib/postgresql
       # Crea la BD de pruebas (bebras_bolivia_test) al inicializar un volumen nuevo
       - ./scripts/db:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-dev_user} -d ${DB_NAME:-bebras_bolivia}"]
+      test: ['CMD-SHELL', 'pg_isready -U ${DB_USER:-dev_user} -d ${DB_NAME:-bebras_bolivia}']
       interval: 5s
       timeout: 5s
       retries: 10
@@ -54,14 +54,20 @@ services:
       JWT_EXPIRACION: ${JWT_EXPIRACION:-15m}
       JWT_REFRESH_EXPIRACION: ${JWT_REFRESH_EXPIRACION:-7d}
     ports:
-      - "4102:4102"
+      - '4102:4102'
     # El arranque (crear esquema -> migrar -> seed -> servir) está en el CMD del Dockerfile.
     depends_on:
       postgres_db:
         condition: service_healthy
     healthcheck:
       # node está disponible en la imagen; evita depender de curl/wget
-      test: ["CMD", "node", "-e", "fetch('http://localhost:4102/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://localhost:4102/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -82,7 +88,7 @@ services:
     container_name: bebras_cliente
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - '3000:3000'
     depends_on:
       user-service:
         condition: service_healthy

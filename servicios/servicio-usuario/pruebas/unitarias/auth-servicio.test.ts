@@ -34,9 +34,11 @@ const repositorioDoble = {
   buscarPorCorreoExcluyendo: jest.fn(),
   actualizarPerfil: jest.fn(),
   listar: jest.fn(),
+  buscarPorNombre: jest.fn(),
   eliminar: jest.fn(),
   actualizarEstadoActivo: jest.fn(),
 };
+
 
 const hasheadorDoble = {
   hashear: jest.fn(),
